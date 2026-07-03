@@ -249,7 +249,10 @@
           <div class="lbl" id="genLbl">Girls night in's theme</div>
           <div class="name" id="genTheme">—</div>
         </div>
-        <div class="pal" id="genPal"></div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex:0 0 auto;">
+          <div class="pal" id="genPal"></div>
+          <button id="keepThemeBtn" class="keep" style="background:rgba(255,255,255,0.25);border-color:rgba(255,255,255,0.4);color:#fff;font-size:11px;">Keep</button>
+        </div>
       </div>
 
       <div class="cards">
@@ -351,7 +354,7 @@
 
   var emptyItem={name:'Loading…',supplies:[],images:[]};
   var state={theme:{name:'Loading…',bg:'#E9E2CF',ink:'#1B1A18',palette:[],font:"'Inter',sans-serif",weight:600,caps:false,scale:1},craft:emptyItem,food:emptyItem,drink:emptyItem,serves:6};
-  var kept={craft:false,food:false,drink:false};
+  var kept={craft:false,food:false,drink:false,theme:false};
 
   function styleThemeBox(box, nameEl, lblEl, t, baseSize){
     box.style.background=t.bg;
@@ -531,9 +534,18 @@
       btn.textContent=kept[k]?'Kept':'Keep';
     });
   });
+  el('keepThemeBtn').addEventListener('click',function(){
+    kept.theme=!kept.theme;
+    var btn=el('keepThemeBtn');
+    btn.textContent=kept.theme?'Kept':'Keep';
+    btn.style.background=kept.theme?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.25)';
+    btn.style.color=kept.theme?'var(--accent)':'#fff';
+    btn.style.borderColor=kept.theme?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.4)';
+  });
   function resetKeeps(){
-    kept={craft:false,food:false,drink:false};
+    kept={craft:false,food:false,drink:false,theme:false};
     ['craft','food','drink'].forEach(function(k){ el('card-'+k).classList.remove('kept'); el('card-'+k).querySelector('.keep').textContent='Keep'; });
+    var tb=el('keepThemeBtn'); tb.textContent='Keep'; tb.style.background='rgba(255,255,255,0.25)'; tb.style.color='#fff'; tb.style.borderColor='rgba(255,255,255,0.4)';
   }
 
   function show(id){
@@ -548,11 +560,29 @@
   el('nextBtn').addEventListener('click',function(){ renderBoard(); show('screenBoard'); });
   el('restartBtn').addEventListener('click',function(){ resetKeeps(); shuffle(); show('screenGen'); });
 
-  el('shareBtn2').addEventListener('click',function(){
-    var id=Math.random().toString(36).slice(2,8);
-    el('shareUrl').value='https://ppinkky.github.io/girls-night-in/?plan='+id;
+  el('shareBtn2').addEventListener('click',async function(){
     el('pngProgress').style.display='none';
+    el('shareUrl').value='Generating link…';
     el('shareOverlay').classList.add('show');
+    try{
+      var id=Math.random().toString(36).slice(2,10);
+      var row={
+        id:id,
+        theme_id:state.theme.id||null,
+        craft_id:state.craft.id||null,
+        food_id:state.food.id||null,
+        drink_id:state.drink.id||null,
+        serves:state.serves
+      };
+      await fetch(SUPA_URL+'/rest/v1/plans',{
+        method:'POST',
+        headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify(row)
+      });
+      el('shareUrl').value='https://ppinkky.github.io/girls-night-in/?plan='+id;
+    }catch(e){
+      el('shareUrl').value='https://ppinkky.github.io/girls-night-in/?plan=error';
+    }
     setTimeout(function(){ el('shareUrl').select(); },60);
   });
   el('shareClose').addEventListener('click',function(){ el('shareOverlay').classList.remove('show'); });
@@ -651,9 +681,37 @@
     setTimeout(function(){ t.classList.remove('show'); },2200);
   }
 
+  async function loadPlanFromUrl(){
+    var params=new URLSearchParams(window.location.search);
+    var planId=params.get('plan');
+    if(!planId) return false;
+    try{
+      var r=await fetch(SUPA_URL+'/rest/v1/plans?id=eq.'+planId+'&select=*',{
+        headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+      });
+      var rows=await r.json();
+      if(!rows||!rows.length) return false;
+      var plan=rows[0];
+      // match IDs to loaded data
+      if(plan.craft_id){ var c=crafts.find(function(x){return x.id==plan.craft_id;}); if(c) state.craft=c; }
+      if(plan.food_id){ var f=foods.find(function(x){return x.id==plan.food_id;}); if(f) state.food=f; }
+      if(plan.drink_id){ var d=drinks.find(function(x){return x.id==plan.drink_id;}); if(d) state.drink=d; }
+      if(plan.theme_id){ var t=themes.find(function(x){return x.id==plan.theme_id;}); if(t) state.theme=t; }
+      if(plan.serves) state.serves=plan.serves;
+      return true;
+    }catch(e){ return false; }
+  }
+
   (async function(){
     await loadFromSupabase(true);
-    renderGen();
+    var isPlan=await loadPlanFromUrl();
+    if(isPlan){
+      // shared plan — go straight to moodboard
+      renderBoard();
+      show('screenBoard');
+    } else {
+      renderGen();
+    }
     setInterval(function(){ loadFromSupabase(false).then(function(){ renderGen(); }); },10000);
     document.addEventListener('visibilitychange',function(){ if(!document.hidden) loadFromSupabase(false).then(function(){ renderGen(); }); });
   })();
