@@ -183,7 +183,8 @@
     <div class="logo">Girls Night In</div>
     <span class="tagline">Content manager</span>
     <div class="grow"></div>
-    
+    <span class="sync-dot"></span>
+    <span style="font-size:12px;color:var(--green);font-weight:500;">Live sync on</span>
     <a href="https://ppinkky.github.io/girls-night-in/" class="gen-link">→ Open generator</a>
   </div>
 
@@ -295,6 +296,10 @@
       <div class="sheet-body">
         <div class="form-group"><label>Name</label><input type="text" id="f-name" placeholder="e.g. Hand-poured candles"></div>
         <div class="form-group"><label>Vibe / description</label><input type="text" id="f-desc" placeholder="e.g. mellow, meditative, beginner-friendly"></div>
+        <div class="form-group" id="fg-contributed">
+          <label>Contributed by <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+          <input type="text" id="f-contributed" placeholder="e.g. Sarah, @username">
+        </div>
 
         <!-- single image -->
         <div class="form-group" id="fg-single-img">
@@ -444,6 +449,7 @@
       id: row.id,
       name: row.name,
       desc: row.description,
+      contributedBy: row.contributed_by,
       difficulty: row.difficulty,
       baseServes: row.base_serves,
       supplies: row.supplies || [],
@@ -464,6 +470,7 @@
     var row = {
       name: item.name,
       description: item.desc,
+      contributed_by: item.contributedBy || null,
       source: item.source || 'manual',
       url: item.url || null
     };
@@ -548,6 +555,7 @@
     if(item.difficulty) parts.push(item.difficulty);
     if(item.baseServes) parts.push('for ' + item.baseServes);
     if(item.supplies && item.supplies.length) parts.push(item.supplies.length + ' items');
+    if(item.contributedBy) parts.push('by '+item.contributedBy);
     if(item.source === 'insta') parts.push('from reel');
     meta.textContent = parts.join(' · ');
     info.appendChild(name); info.appendChild(meta);
@@ -632,6 +640,7 @@
     var item = {
       name: name,
       desc: el('f-desc').value.trim(),
+      contributedBy: el('f-contributed').value.trim(),
       difficulty: diffEl ? diffEl.value : null,
       baseServes: baseServes,
       instructions: el('f-instructions').value.trim(),
