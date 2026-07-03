@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Girls Night In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Fredoka:wght@500;600;700&family=Pacifico&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#E9E2CF; --cream-hi:#F3EEE0; --card:#FBF7EC;
+    --ink:#1B1A18; --soft:#6E685C; --faint:#9A9282; --hairline:#DED6C2;
+    --accent:#B4756B; --accent-hover:#9C6058; --accent-soft:#CDA29A; --accent-pale:#F1E4DF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{ background:var(--cream); font-family:'Inter',system-ui,sans-serif; color:var(--ink); -webkit-font-smoothing:antialiased; min-height:100vh; }
+  @media (prefers-reduced-motion: reduce){ *{transition-duration:0.001ms !important;} }
+
+  .screen{ display:none; }
+  .screen.active{ display:block; animation:fade 0.3s ease; }
+  @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+
+  .wrap{ max-width:920px; margin:0 auto; padding:26px 20px 40px; }
+  .board-wrap{ max-width:760px; }
+
+  .head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .brand{ font-family:'Space Mono',monospace; font-size:13px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; display:flex; align-items:center; gap:8px; }
+  .brand::before{ content:""; width:9px; height:9px; border-radius:50%; background:var(--accent); }
+  .stepnum{ font-family:'Space Mono',monospace; font-size:12px; font-weight:700; color:var(--accent); }
+
+  /* theme container — restyled per theme via JS */
+  .theme{ border-radius:16px; padding:22px 24px; margin-bottom:18px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; transition:background 0.35s ease; }
+  .theme .l{ min-width:0; }
+  .theme .lbl{ font-family:'Space Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; }
+  .theme .name{ font-size:36px; line-height:0.98; letter-spacing:0.01em; margin-top:8px; transition:color 0.35s ease; text-shadow:none; }
+  .theme .pal{ display:flex; gap:7px; flex:0 0 auto; }
+  .theme .pal .d{ width:26px; height:26px; border-radius:6px; }
+
+  .cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  @media (max-width:680px){ .cards{ grid-template-columns:1fr; } }
+  .card{ border-radius:16px; overflow:hidden; background:var(--card); border:1.5px solid var(--hairline); transition:border-color 0.15s ease; }
+  .card.kept{ border-color:var(--accent); }
+  .card .imgw{ position:relative; aspect-ratio:3/4; }
+  .card img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .card .fb{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; font-family:'Anton',sans-serif; font-size:56px; color:var(--accent); background:var(--accent-pale); }
+  .card .kept-tag{ position:absolute; top:10px; left:10px; display:none; font-family:'Space Mono',monospace; font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#fff; background:var(--accent); border-radius:999px; padding:5px 10px; }
+  .card.kept .kept-tag{ display:block; }
+  .card .cap{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; padding:12px 14px 14px; }
+  .card .capL{ min-width:0; }
+  .card .cat{ font-family:'Space Mono',monospace; font-size:10.5px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--accent); }
+  .diff-badge{ display:inline-block; font-family:'Space Mono',monospace; font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; padding:3px 8px; border-radius:999px; margin-top:5px; }
+  .diff-easy{ background:#E4F0E8; color:#3A6448; }
+  .diff-medium{ background:#FBF3D0; color:#8A6500; }
+  .diff-hard{ background:#F5E0E0; color:#8A3030; }
+  .card .val{ font-size:15.5px; font-weight:600; margin-top:3px; line-height:1.25; }
+  .keep{ flex:0 0 auto; font-family:'Space Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--soft); background:var(--cream-hi); border:1.5px solid var(--hairline); border-radius:999px; padding:6px 12px; cursor:pointer; transition:all 0.12s ease; }
+  .keep:hover{ border-color:var(--accent); color:var(--accent); }
+  .keep:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .card.kept .keep{ background:var(--accent); border-color:var(--accent); color:#fff; }
+
+  .topnav{ display:flex; align-items:center; gap:12px; padding:12px 20px; background:var(--card); border-bottom:1px solid var(--hairline); position:sticky; top:0; z-index:20; }
+  .topnav .brand{ font-family:'Space Mono',monospace; font-size:13px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; display:flex; align-items:center; gap:8px; }
+  .topnav .brand::before{ content:""; width:8px; height:8px; border-radius:50%; background:var(--accent); }
+  .topnav .grow{ flex:1; }
+
+  /* ---- liquid-glass bottom bar ---- */
+  .glassbar{ position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:40;
+    display:flex; align-items:center; gap:12px; padding:10px 12px;
+    width:min(560px, calc(100% - 32px)); border-radius:22px;
+    background:rgba(251,247,236,0.55);
+    -webkit-backdrop-filter:blur(20px) saturate(1.6); backdrop-filter:blur(20px) saturate(1.6);
+    border:1px solid rgba(255,255,255,0.55);
+    box-shadow:0 8px 32px rgba(27,26,24,0.16), inset 0 1px 0 rgba(255,255,255,0.7);
+  }
+  .glassbar .people{ display:flex; align-items:center; gap:8px; }
+  .glassbar .people .lbl{ font-family:'Space Mono',monospace; font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--soft); }
+  .glassbar .grow{ flex:1; }
+  .glassbar .step button{ background:rgba(255,255,255,0.5); border:1px solid rgba(255,255,255,0.6); }
+  .glassbar .step button:hover{ background:rgba(255,255,255,0.85); }
+  .glassbar .btn{ box-shadow:0 2px 8px rgba(27,26,24,0.12); }
+  .glassbar .btn-out{ background:rgba(255,255,255,0.5); border-color:rgba(255,255,255,0.7); }
+  .glassbar .btn-out:hover{ background:rgba(255,255,255,0.85); }
+  @media (max-width:520px){
+    .glassbar{ gap:8px; padding:9px 10px; bottom:12px; }
+    .glassbar .people .lbl{ display:none; }
+    .glassbar .btn{ padding:12px 16px; font-size:12px; }
+  }
+  /* give screens breathing room so content isn't hidden behind the bar */
+  #screenGen .wrap{ padding-bottom:100px; }
+  .people{ display:flex; align-items:center; gap:8px; }
+  .people .lbl{ font-family:'Space Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--soft); }
+  .step{ display:flex; align-items:center; gap:8px; }
+  .step button{ width:30px; height:30px; border-radius:50%; border:1.5px solid var(--ink); background:var(--card); font-size:16px; line-height:1; color:var(--ink); cursor:pointer; }
+  .step button:hover{ background:var(--accent-pale); }
+  .step button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .step .count{ font-family:'Anton',sans-serif; font-size:18px; min-width:18px; text-align:center; }
+  .grow{ flex:1; }
+
+  .btn{ font-family:'Space Mono',monospace; font-size:13px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; border-radius:999px; padding:13px 22px; cursor:pointer; transition:background 0.12s ease, transform 0.1s ease; }
+  .btn:active{ transform:translateY(1px); }
+  .btn-out{ background:var(--card); border:1.5px solid var(--ink); color:var(--ink); }
+  .btn-out:hover{ background:var(--accent-pale); }
+  .btn-out:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .btn-solid{ background:var(--accent); border:1.5px solid var(--accent); color:#fff; }
+  .btn-solid:hover{ background:var(--accent-hover); border-color:var(--accent-hover); }
+  .btn-solid:focus-visible{ outline:2px solid var(--ink); outline-offset:3px; }
+
+  /* moodboard hero — restyled per theme via JS */
+  .mb-hero{ border-radius:18px; padding:28px 24px; text-align:center; transition:background 0.35s ease; }
+  .mb-hero .lbl{ font-family:'Space Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; }
+  .mb-hero .name{ font-size:54px; line-height:0.95; letter-spacing:0.01em; margin:12px 0 0; text-shadow:none; }
+  .mb-hero .meta{ display:flex; gap:16px; align-items:center; justify-content:center; margin-top:18px; flex-wrap:wrap; }
+  .mb-hero .pal{ display:flex; gap:7px; }
+  .mb-hero .pal .d{ width:24px; height:24px; border-radius:6px; }
+  .mb-hero .chip{ font-family:'Space Mono',monospace; font-size:12px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; border:1.5px solid; border-radius:999px; padding:7px 14px; }
+
+  .mb-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:14px; }
+  @media (max-width:680px){ .mb-grid{ grid-template-columns:1fr; } }
+  .mb-tile{ border-radius:16px; overflow:hidden; background:var(--card); border:1px solid var(--hairline); }
+  .mb-tile .imgw{ position:relative; aspect-ratio:1/1; }
+  .mb-tile img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .mb-tile .fb{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; font-family:'Anton',sans-serif; font-size:48px; color:var(--accent); background:var(--accent-pale); }
+  .mb-tile .cap{ padding:11px 13px 13px; }
+  .mb-tile .cat{ font-family:'Space Mono',monospace; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--accent); }
+  .mb-tile .val{ font-size:14.5px; font-weight:600; margin-top:3px; line-height:1.25; }
+
+  .mb-list{ background:var(--card); border:1px solid var(--hairline); border-radius:16px; padding:20px 22px; margin-top:14px; }
+  .mb-list > h4{ margin:0 0 18px; font-family:'Space Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--accent); }
+  .list-sections{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  @media (max-width:620px){ .list-sections{ grid-template-columns:1fr; gap:16px; } }
+  .list-sec{ border-top:1.5px solid var(--hairline); padding-top:14px; }
+  .list-sec .sec-label{ font-family:'Space Mono',monospace; font-size:10.5px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--soft); margin-bottom:10px; }
+  .list-sec ul{ list-style:none; margin:0; padding:0; }
+  .list-sec li{ display:flex; align-items:flex-start; gap:9px; padding:5px 0; font-size:13.5px; font-weight:500; line-height:1.35; }
+  .list-sec li::before{ content:""; width:13px; height:13px; border:1.5px solid var(--ink); border-radius:3px; flex:0 0 auto; margin-top:2px; }
+
+  .mb-actions{ display:flex; gap:12px; margin-top:20px; }
+  .mb-actions .btn{ flex:1; text-align:center; }
+
+  .foot{ text-align:center; margin-top:22px; font-family:'Space Mono',monospace; font-size:11.5px; color:var(--soft); }
+  .foot b{ color:var(--accent); font-weight:700; }
+
+  .overlay{ position:fixed; inset:0; background:rgba(27,26,24,0.45); z-index:60; display:none; align-items:center; justify-content:center; padding:20px; }
+  .overlay.show{ display:flex; }
+  .modal{ width:100%; max-width:420px; background:var(--cream-hi); border-radius:18px; padding:24px 24px 26px; box-shadow:0 20px 60px rgba(27,26,24,0.22); }
+  .modal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .modal-head h4{ font-family:'Space Mono',monospace; font-size:12px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--accent); margin:0; }
+  .modal-head button{ background:none; border:none; font-size:18px; cursor:pointer; color:var(--soft); }
+
+  .share-url-row{ display:flex; gap:8px; padding-top:14px; border-top:1px solid var(--hairline); }
+  .share-url-row input{ flex:1; font-family:'Space Mono',monospace; font-size:12.5px; padding:10px 13px; border:1.5px solid var(--hairline); border-radius:8px; background:#fff; color:var(--accent); outline:none; }
+  .share-url-row button{ font-family:'Space Mono',monospace; font-size:12px; font-weight:700; text-transform:uppercase; color:#fff; background:var(--ink); border:none; border-radius:8px; padding:10px 16px; cursor:pointer; white-space:nowrap; }
+  .png-progress{ display:none; text-align:center; padding:14px 0; font-family:'Space Mono',monospace; font-size:12px; color:var(--soft); }
+  .png-progress.show{ display:block; }
+  .sync-toast{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(70px); background:var(--ink); color:#E9E2CF; font-family:'Space Mono',monospace; font-size:12px; font-weight:700; letter-spacing:0.04em; padding:11px 18px; border-radius:999px; z-index:80; opacity:0; transition:all 0.3s ease; pointer-events:none; display:flex; align-items:center; gap:8px; }
+  .sync-toast::before{ content:""; width:7px; height:7px; border-radius:50%; background:#7BC47F; }
+  .sync-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .admin-link{ font-family:'Inter',sans-serif; font-size:13px; font-weight:500; color:var(--faint); text-decoration:underline; text-underline-offset:3px; transition:color 0.12s; }
+  .admin-link:hover{ color:var(--accent); }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+  <!-- ===== SCREEN 1: GENERATE ===== -->
+  <section class="screen active" id="screenGen">
+    <div class="topnav">
+      <div class="brand">Girls Night In</div>
+      <div class="grow"></div>
+      <a class="admin-link" href="girls-night-in-admin.html" title="Open admin portal">Contribute to the lists</a>
+    </div>
+
+    <div class="glassbar">
+      <div class="people">
+        <span class="lbl">People</span>
+        <div class="step">
+          <button id="minus" aria-label="Fewer people">−</button>
+          <span class="count" id="count">6</span>
+          <button id="plus" aria-label="More people">+</button>
+        </div>
+      </div>
+      <div class="grow"></div>
+      <button class="btn btn-out" id="shuffleBtn">↻ Shuffle</button>
+      <button class="btn btn-solid" id="nextBtn">Next →</button>
+    </div>
+    <div class="wrap">
+      <div class="theme" id="genThemeBox">
+        <div class="l">
+          <div class="lbl" id="genLbl">Girls night in's theme</div>
+          <div class="name" id="genTheme">—</div>
+        </div>
+        <div class="pal" id="genPal"></div>
+      </div>
+
+      <div class="cards">
+        <div class="card" id="card-craft">
+          <div class="imgw"><img id="img-craft" alt=""><div class="fb">C</div><div class="kept-tag">Kept</div></div>
+          <div class="cap"><div class="capL"><div class="cat">Craft</div><div class="val" id="craftVal">—</div></div><button class="keep" data-key="craft">Keep</button></div>
+        </div>
+        <div class="card" id="card-food">
+          <div class="imgw"><img id="img-food" alt=""><div class="fb">F</div><div class="kept-tag">Kept</div></div>
+          <div class="cap"><div class="capL"><div class="cat">Food</div><div class="val" id="foodVal">—</div></div><button class="keep" data-key="food">Keep</button></div>
+        </div>
+        <div class="card" id="card-drink">
+          <div class="imgw"><img id="img-drink" alt=""><div class="fb">D</div><div class="kept-tag">Kept</div></div>
+          <div class="cap"><div class="capL"><div class="cat">Drink</div><div class="val" id="drinkVal">—</div></div><button class="keep" data-key="drink">Keep</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SCREEN 2: MOODBOARD ===== -->
+  <section class="screen" id="screenBoard">
+    <div class="wrap board-wrap">
+      <div class="head">
+        <div class="brand">Girls Night In</div>
+        <div class="stepnum">✦ Your moodboard</div>
+      </div>
+
+      <div class="mb-hero" id="mbHero">
+        <div class="lbl" id="mbLbl">Your girls night in</div>
+        <div class="name" id="mbTheme">—</div>
+        <div class="meta">
+          <div class="pal" id="mbPal"></div>
+          <div class="chip" id="mbPeople">For 6 people</div>
+        </div>
+      </div>
+
+      <div class="mb-grid">
+        <div class="mb-tile">
+          <div class="imgw"><img id="mb-craft" alt=""><div class="fb">C</div></div>
+          <div class="cap"><div class="cat">Craft</div><div class="val" id="mbCraftVal">—</div></div>
+        </div>
+        <div class="mb-tile">
+          <div class="imgw"><img id="mb-food" alt=""><div class="fb">F</div></div>
+          <div class="cap"><div class="cat">Food</div><div class="val" id="mbFoodVal">—</div></div>
+        </div>
+        <div class="mb-tile">
+          <div class="imgw"><img id="mb-drink" alt=""><div class="fb">D</div></div>
+          <div class="cap"><div class="cat">Drink</div><div class="val" id="mbDrinkVal">—</div></div>
+        </div>
+      </div>
+
+      <div class="mb-list">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px;"><h4 style="margin:0;">Shopping list</h4><span id="mbShopPeople" style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--faint);">for 6 people</span></div>
+        <div class="list-sections" id="mbShop"></div>
+      </div>
+
+      <div class="mb-actions">
+        <button class="btn btn-out" id="restartBtn">↻ Restart</button>
+        <button class="btn btn-solid" id="shareBtn2">Share plan</button>
+      </div>
+
+      <div class="foot">made with <b>Girls Night In</b> · make your own</div>
+    </div>
+  </section>
+
+  <div class="sync-toast" id="syncToast">Content updated from admin</div>
+
+  <div class="overlay" id="shareOverlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h4>Share your plan</h4>
+        <button id="shareClose" aria-label="Close">✕</button>
+      </div>
+      <div class="form-group" style="margin-bottom:8px;">
+        <label style="display:block;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--soft);margin-bottom:8px;">Link</label>
+        <div class="share-url-row" id="linkRow">
+          <input id="shareUrl" readonly placeholder="Generating…">
+          <button id="copyBtn">Copy</button>
+        </div>
+      </div>
+      <div class="png-progress" id="pngProgress" style="display:none;font-family:'Space Mono',monospace;font-size:12px;color:var(--soft);padding:6px 0;">Capturing moodboard…</div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--hairline);">
+        <button onclick="savePNG()" style="background:none;border:none;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;color:var(--soft);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:0;transition:color 0.12s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--soft)'">Save as image</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  // each theme carries its own color, type and vibe
+  var themes=[
+    {name:"Spring Brunch", bg:"#EAF3E4", ink:"#2F4A32", accent:"#E5A6B8", font:"'Fredoka',sans-serif", weight:600, caps:true, scale:1, vibe:"fresh & sunny", palette:["#A8CBA0","#F2D06B","#EFE7D2","#E5A6B8"]},
+    {name:"Lemon Picnic", bg:"#FBF3C8", ink:"#5C4A12", accent:"#E0A32E", font:"'Fredoka',sans-serif", weight:700, caps:true, scale:1, vibe:"zesty & bright", palette:["#F4D35E","#E8B04B","#FBF3C8","#8FA96B"]},
+    {name:"Coastal Summer", bg:"#DCEEF2", ink:"#1E4A55", accent:"#E0A45C", font:"'Fraunces',serif", weight:600, caps:true, scale:1, vibe:"breezy & blue", palette:["#8FC0CE","#4E8A9A","#DCEEF2","#E0A45C"]},
+    {name:"Cozy Book Club", bg:"#E7DAC4", ink:"#4A3726", accent:"#8A5A3C", font:"'Fraunces',serif", weight:500, caps:false, scale:1, vibe:"warm & quiet", palette:["#B98C5A","#8A5A3C","#E7DAC4","#5A4632"]},
+    {name:"Pumpkin Paint Party", bg:"#F6D9BC", ink:"#7A3B1E", accent:"#E2662C", font:"'Anton',sans-serif", weight:400, caps:true, scale:1, vibe:"bold & messy", palette:["#E2662C","#F0A35A","#F6D9BC","#7A3B1E"]},
+    {name:"Friendsgiving", bg:"#EBD9C4", ink:"#5A3220", accent:"#B5502F", font:"'Fraunces',serif", weight:600, caps:true, scale:1, vibe:"cozy & full", palette:["#B5502F","#D98A4E","#EBD9C4","#5A3220"]},
+    {name:"Galentine's Night", bg:"#F6DDE7", ink:"#7A2F52", accent:"#E0658F", font:"'Pacifico',cursive", weight:400, caps:false, scale:0.82, vibe:"sweet & giggly", palette:["#E0658F","#F2A9C4","#F6DDE7","#7A2F52"]},
+    {name:"Cottage Garden Tea", bg:"#E6EEDD", ink:"#3E5236", accent:"#C98BA6", font:"'Fraunces',serif", weight:500, caps:false, scale:1, vibe:"delicate & floral", palette:["#9CB37E","#C98BA6","#E6EEDD","#3E5236"]},
+    {name:"Autumn Harvest", bg:"#EAD9C0", ink:"#5C3A1E", accent:"#C06A2C", font:"'Anton',sans-serif", weight:400, caps:true, scale:1, vibe:"earthy & rich", palette:["#C06A2C","#E3B168","#EAD9C0","#5C3A1E"]}
+  ];
+
+  function mk(n,kw,lk){ return {name:n,kw:kw,lk:lk}; }
+  var crafts=[mk("Hand-poured candles","candle,handmade",101),mk("Embroidered tote bags","embroidery,fabric",102),mk("Clay trinket dishes","pottery,clay",103),mk("Watercolor prints","watercolor,painting",104),mk("Macramé plant hangers","macrame",105),mk("Painted terracotta pots","terracotta,plant",106),mk("Beaded bracelets","beads,jewelry",107),mk("Marbled coasters","marble,paper,craft",108)];
+  var foods=[mk("Mini quiches & fruit","quiche",201),mk("Lemon bars & caprese","lemon,dessert",202),mk("Fig & honey board","charcuterie",203),mk("Baked brie & crostini","brie,cheese",204),mk("Cider donuts","donut",205),mk("Herb focaccia & olives","focaccia,bread",206),mk("Pumpkin mini muffins","muffin",207)];
+  var drinks=[mk("Elderflower spritz","cocktail,spritz",301),mk("Minty lemonade","lemonade",302),mk("Rosé sangria","sangria,wine",303),mk("Spiced chai","chai,tea",304),mk("Cider mimosas","mimosa,drink",305),mk("Iced hibiscus tea","iced,tea",306),mk("Berry prosecco","prosecco,drink",307)];
+  var craftSupplies={
+    "Hand-poured candles":["Soy wax flakes (2 lbs)","Pre-tabbed cotton wicks","Fragrance oil of choice","Glass or tin containers","Wooden stir sticks","Thermometer","Pouring pitcher","Labels"],
+    "Embroidered tote bags":["Plain canvas tote bags","Embroidery floss (assorted)","5\" & 7\" hoops","Embroidery needles","Water-soluble fabric pen","Scissors","Pattern printouts","Iron-on stabilizer"],
+    "Clay trinket dishes":["Air-dry clay (1 block each)","Small rolling pins","Cookie cutters / stamps","Acrylic paint set","Sponge brushes","Mod Podge sealant","Parchment paper","Sandpaper (fine)"],
+    "Watercolor prints":["Cold-press watercolor paper","Watercolor paint set","Round brushes (2, 6, 10)","Painter's tape","Pencils","Water jars","Paper towels","Spray bottle"],
+    "Macramé plant hangers":["5mm macramé cord (50ft each)","Wooden dowels or rings","S-hooks","Scissors","Measuring tape","Small pothos or succulents","Fringe brush (optional)","Hanging hardware"],
+    "Painted terracotta pots":["Terracotta pots (4\"-6\")","Chalk or acrylic paint","Flat & round brushes","Painter's tape","Spray sealant","Drop cloth","Palette paper","Water cups"],
+    "Beaded bracelets":["Seed beads (assorted colors)","0.5mm elastic cord","Bead sorting trays","Big-eye needles","Scissors","Crimp covers","Bead mat","Clasps (optional)"],
+    "Marbled coasters":["Plain cork coasters","Acrylic pour paint (3-4 colors)","Silicone oil","Plastic cups","Stir sticks","Blow torch or straw","Gloss varnish","Drop cloth"]
+  };
+  var foodSupplies={
+    "Mini quiches & fruit":["Eggs (1 doz)","Heavy cream","Mini pie shells","Gruyère cheese","Baby spinach","Cherry tomatoes","Assorted fruit","Honey for drizzle"],
+    "Lemon bars & caprese":["Fresh lemons (6)","Butter","Powdered sugar","Flour","Eggs","Fresh mozzarella","Heirloom tomatoes","Basil & good olive oil"],
+    "Fig & honey board":["Dried & fresh figs","Local honey","Aged cheddar & brie","Prosciutto","Walnuts & almonds","Crackers & crostini","Grapes","Rosemary sprigs"],
+    "Baked brie & crostini":["Wheel of brie","Puff pastry sheet","Fig jam","Walnuts","Baguette","Olive oil","Fresh thyme","Egg wash"],
+    "Cider donuts":["Apple cider (2 cups)","Flour","Cinnamon & nutmeg","Sugar","Baking powder","Eggs & butter","Oil for frying","Powdered sugar for coating"],
+    "Herb focaccia & olives":["Bread flour (3 cups)","Active dry yeast","Olive oil (generous)","Fresh rosemary","Flaky sea salt","Mixed olives","Garlic cloves","Cherry tomatoes"],
+    "Pumpkin mini muffins":["Canned pumpkin purée","Flour","Eggs","Brown sugar","Cinnamon & pumpkin spice","Butter","Cream cheese (frosting)","Mini muffin tins"]
+  };
+  var drinkSupplies={
+    "Elderflower spritz":["Elderflower cordial","Prosecco (2 bottles)","Sparkling water","Fresh cucumber","Mint leaves","Lemon","Ice","Champagne flutes"],
+    "Minty lemonade":["Fresh lemons (8)","Granulated sugar","Fresh mint (big bunch)","Sparkling or still water","Ice","Pitcher","Simple syrup","Lemon slices for garnish"],
+    "Rosé sangria":["Dry rosé (2 bottles)","Brandy (¼ cup)","Simple syrup","Strawberries & peaches","Orange slices","Sparkling water","Ice","Large pitcher"],
+    "Spiced chai":["Chai concentrate or loose leaf","Whole milk or oat milk","Cinnamon sticks","Star anise","Cardamom pods","Honey","Vanilla extract","Mugs"],
+    "Cider mimosas":["Apple cider (fresh, 1 jug)","Prosecco (2 bottles)","Cinnamon sticks","Apple slices","Champagne flutes","Ice bucket","Caramel drizzle","Brown sugar rim"],
+    "Iced hibiscus tea":["Dried hibiscus flowers","Cane sugar","Fresh ginger","Lime juice","Sparkling water","Ice","Mint","Tall glasses"],
+    "Berry prosecco":["Prosecco (2 bottles)","Fresh raspberries & blackberries","Crème de cassis (optional)","Lemon zest","Mint","Champagne flutes","Ice bucket","Berry skewers"]
+  };
+
+  function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+  function el(id){ return document.getElementById(id); }
+  function imgUrl(it,w,h){ return it.image||('https://loremflickr.com/'+w+'/'+h+'/'+encodeURIComponent(it.kw||'craft')+'?lock='+(it.lk||Math.floor(Math.random()*999))); }
+  function setImg(id,it,w,h){ var img=el(id),fb=img.nextElementSibling; fb.style.display='none'; img.style.display='block'; img.onerror=function(){img.style.display='none';fb.style.display='flex';}; img.src=imgUrl(it,w,h); }
+  function hexA(hex,a){ var n=parseInt(hex.slice(1),16); return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')'; }
+  function pal(node,arr){ node.innerHTML=''; arr.forEach(function(h){ var d=document.createElement('div'); d.className='d'; d.style.background=h; d.style.boxShadow='inset 0 0 0 1px rgba(0,0,0,0.10)'; node.appendChild(d); }); }
+
+  var state={theme:pick(themes),craft:pick(crafts),food:pick(foods),drink:pick(drinks),serves:6};
+  var kept={craft:false,food:false,drink:false};
+
+  function styleThemeBox(box, nameEl, lblEl, t, baseSize){
+    box.style.background=t.bg;
+    lblEl.style.color=hexA(t.ink,0.75);
+    nameEl.textContent=t.name;
+    nameEl.style.color=t.ink;
+    nameEl.style.fontFamily=t.font;
+    nameEl.style.fontWeight=t.weight;
+    nameEl.style.textTransform=t.caps?'uppercase':'none';
+    nameEl.style.fontSize=Math.round(baseSize*(t.scale||1))+'px';
+    nameEl.style.textShadow='none';
+  }
+
+  function themeBannerImg(t){
+    // if theme has moodboard images, show them tiled
+    var box=el('genThemeBox');
+    var existing=box.querySelector('.theme-mosaic-wrap');
+    if(existing) existing.remove();
+    if(t.images&&t.images.some(Boolean)){
+      var wrap=document.createElement('div');
+      wrap.className='theme-mosaic-wrap';
+      wrap.style.cssText='display:flex;gap:4px;flex:0 0 auto;border-radius:10px;overflow:hidden;width:120px;height:70px;';
+      t.images.forEach(function(src){
+        if(!src) return;
+        var img=document.createElement('img');
+        img.src=src; img.style.cssText='flex:1;min-width:0;object-fit:cover;';
+        wrap.appendChild(img);
+      });
+      box.appendChild(wrap);
+    }
+    var mbBox=el('mbHero');
+    var existing2=mbBox.querySelector('.theme-mosaic-wrap');
+    if(existing2) existing2.remove();
+    if(t.images&&t.images.some(Boolean)){
+      var wrap2=document.createElement('div');
+      wrap2.className='theme-mosaic-wrap';
+      wrap2.style.cssText='display:flex;gap:6px;justify-content:center;margin-top:14px;border-radius:12px;overflow:hidden;max-width:320px;margin-left:auto;margin-right:auto;height:110px;';
+      t.images.forEach(function(src){
+        if(!src) return;
+        var img=document.createElement('img');
+        img.src=src; img.style.cssText='flex:1;min-width:0;object-fit:cover;';
+        wrap2.appendChild(img);
+      });
+      mbBox.appendChild(wrap2);
+    }
+  }
+
+  function applyTheme(){
+    var t=state.theme;
+    styleThemeBox(el('genThemeBox'), el('genTheme'), el('genLbl'), t, 36);
+    el('genLbl').textContent="Girls night in's theme · "+t.vibe;
+    styleThemeBox(el('mbHero'), el('mbTheme'), el('mbLbl'), t, 54);
+    el('mbLbl').textContent="Your girls night in · "+t.vibe;
+    // chip adapts to theme ink
+    var chip=el('mbPeople'); chip.style.color=t.ink; chip.style.borderColor=hexA(t.ink,0.3);
+    pal(el('genPal'),t.palette); pal(el('mbPal'),t.palette);
+    themeBannerImg(t);
+  }
+
+  function renderGen(){
+    el('craftVal').textContent=state.craft.name;
+    // difficulty badge
+    var oldBadge=document.getElementById('diff-badge-gen');
+    if(oldBadge) oldBadge.remove();
+    if(state.craft.difficulty){
+      var diffMap={easy:'Easy · 30min–1hr',medium:'Medium · 1–2hrs',hard:'Difficult · 2–4hrs'};
+      var badge=document.createElement('div');
+      badge.id='diff-badge-gen';
+      badge.className='diff-badge diff-'+state.craft.difficulty;
+      badge.textContent=diffMap[state.craft.difficulty]||state.craft.difficulty;
+      var capL=document.querySelector('#card-craft .capL');
+      if(capL) capL.appendChild(badge);
+    }
+    el('foodVal').textContent=state.food.name;
+    el('drinkVal').textContent=state.drink.name;
+    el('count').textContent=state.serves;
+    setImg('img-craft',state.craft,500,640);
+    setImg('img-food',state.food,500,640);
+    setImg('img-drink',state.drink,500,640);
+    applyTheme();
+  }
+  function renderBoard(){
+    el('mbCraftVal').textContent=state.craft.name;
+    var oldMbBadge=document.getElementById('diff-badge-mb');
+    if(oldMbBadge) oldMbBadge.remove();
+    if(state.craft.difficulty){
+      var diffMap2={easy:'Easy · 30min–1hr',medium:'Medium · 1–2hrs',hard:'Difficult · 2–4hrs'};
+      var mbBadge=document.createElement('div');
+      mbBadge.id='diff-badge-mb';
+      mbBadge.className='diff-badge diff-'+state.craft.difficulty;
+      mbBadge.textContent=diffMap2[state.craft.difficulty]||state.craft.difficulty;
+      var mbCapL=document.querySelector('#mb-craft').closest('.mb-tile').querySelector('.cap');
+      if(mbCapL) mbCapL.appendChild(mbBadge);
+    }
+    el('mbFoodVal').textContent=state.food.name;
+    el('mbDrinkVal').textContent=state.drink.name;
+    el('mbPeople').textContent='For '+state.serves+' people';
+    el('mbShopPeople').textContent='for '+state.serves+' people';
+    setImg('mb-craft',state.craft,500,500);
+    setImg('mb-food',state.food,500,500);
+    setImg('mb-drink',state.drink,500,500);
+    var shop=el('mbShop'); shop.innerHTML='';
+    var sections=[
+      {label:'Craft supplies',items:craftSupplies[state.craft.name]||[]},
+      {label:'Food & kitchen',items:foodSupplies[state.food.name]||[]},
+      {label:'Drinks & bar',items:drinkSupplies[state.drink.name]||[]}
+    ];
+    sections.forEach(function(s){
+      var sec=document.createElement('div'); sec.className='list-sec';
+      var lbl=document.createElement('div'); lbl.className='sec-label'; lbl.textContent=s.label; sec.appendChild(lbl);
+      var ul=document.createElement('ul');
+      s.items.forEach(function(i){ var li=document.createElement('li'); li.textContent=i; ul.appendChild(li); });
+      sec.appendChild(ul); shop.appendChild(sec);
+    });
+    applyTheme();
+  }
+
+  function shuffle(){
+    state.theme=pick(themes);
+    if(!kept.craft) state.craft=pick(crafts);
+    if(!kept.food) state.food=pick(foods);
+    if(!kept.drink) state.drink=pick(drinks);
+    renderGen();
+  }
+
+  document.querySelectorAll('.keep').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var k=btn.dataset.key; kept[k]=!kept[k];
+      el('card-'+k).classList.toggle('kept',kept[k]);
+      btn.textContent=kept[k]?'Kept':'Keep';
+    });
+  });
+  function resetKeeps(){
+    kept={craft:false,food:false,drink:false};
+    ['craft','food','drink'].forEach(function(k){ el('card-'+k).classList.remove('kept'); el('card-'+k).querySelector('.keep').textContent='Keep'; });
+  }
+
+  function show(id){
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    el(id).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  el('shuffleBtn').addEventListener('click',shuffle);
+  el('minus').addEventListener('click',function(){ state.serves=Math.max(2,state.serves-1); el('count').textContent=state.serves; });
+  el('plus').addEventListener('click',function(){ state.serves=Math.min(20,state.serves+1); el('count').textContent=state.serves; });
+  el('nextBtn').addEventListener('click',function(){ renderBoard(); show('screenBoard'); });
+  el('restartBtn').addEventListener('click',function(){ resetKeeps(); shuffle(); show('screenGen'); });
+
+  el('shareBtn2').addEventListener('click',function(){
+    el('shareUrl').value='craftnight.app/plan/'+Math.random().toString(36).slice(2,8);
+    el('shareOverlay').classList.add('show');
+  });
+  el('shareClose').addEventListener('click',function(){ el('shareOverlay').classList.remove('show'); });
+  el('copyBtn').addEventListener('click',function(){
+    if(navigator.clipboard) navigator.clipboard.writeText(el('shareUrl').value).catch(function(){});
+    el('copyBtn').textContent='Copied'; setTimeout(function(){ el('copyBtn').textContent='Copy'; },1500);
+  });
+  el('shareOverlay').addEventListener('click',function(e){ if(e.target===el('shareOverlay')) el('shareOverlay').classList.remove('show'); });
+
+  // ---- Supabase connection ----
+  var SUPA_URL = 'https://stuarkbtyovbhnyvssbs.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0dWFya2J0eW92YmhueXZzc2JzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjEyNzMsImV4cCI6MjA5ODU5NzI3M30.yHxlpFuswOOOjmRHZzl7iI9SnBJ-TuNDYQ3a1K7L9_8';
+  var lastCount = 0;
+
+  function supaGet(table){
+    return fetch(SUPA_URL+'/rest/v1/'+table+'?select=*&order=created_at.asc',{
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    }).then(function(r){ return r.json(); });
+  }
+
+  function fromRow(row){
+    return {
+      id:row.id, name:row.name, desc:row.description, difficulty:row.difficulty,
+      baseServes:row.base_serves, supplies:row.supplies||[], instructions:row.instructions,
+      image:row.image, images:row.images, vibe:row.vibe, palette:row.palette,
+      bg:row.bg, ink:row.ink, kw:row.name, lk:row.id
+    };
+  }
+
+  async function loadFromSupabase(isFirst){
+    try{
+      var results = await Promise.all([supaGet('crafts'),supaGet('foods'),supaGet('drinks'),supaGet('themes')]);
+      var nc=results[0], nf=results[1], nd=results[2], nt=results[3];
+      if(nc&&nc.length) crafts=nc.map(fromRow);
+      if(nf&&nf.length) foods=nf.map(fromRow);
+      if(nd&&nd.length) drinks=nd.map(fromRow);
+      if(nt&&nt.length){
+        themes=nt.map(function(r){
+          return Object.assign({palette:["#E8A0B4","#F0C987","#F7EFE6","#B08BC4"],font:"'Inter',sans-serif",weight:600,caps:true,scale:1},fromRow(r));
+        });
+      }
+      var newCount=(crafts.length+foods.length+drinks.length+themes.length);
+      if(isFirst){
+        state.craft=pick(crafts); state.food=pick(foods); state.drink=pick(drinks); state.theme=pick(themes);
+      } else if(newCount!==lastCount){
+        if(!crafts.some(function(c){return c.id===state.craft.id;})) state.craft=pick(crafts);
+        if(!foods.some(function(f){return f.id===state.food.id;})) state.food=pick(foods);
+        if(!drinks.some(function(d){return d.id===state.drink.id;})) state.drink=pick(drinks);
+        showSyncToast();
+      }
+      lastCount=newCount;
+    }catch(e){ console.error('Supabase load failed',e); }
+  }
+
+  function showSyncToast(){
+    var t=document.getElementById('syncToast');
+    if(!t) return;
+    t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); },2200);
+  }
+
+  (async function(){
+    await loadFromSupabase(true);
+    renderGen();
+    setInterval(function(){ loadFromSupabase(false).then(function(){ renderGen(); }); },10000);
+    document.addEventListener('visibilitychange',function(){ if(!document.hidden) loadFromSupabase(false).then(function(){ renderGen(); }); });
+  })();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Girls Night In · Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#F0EAD9; --card:#FDFAF3; --ink:#1B1A18; --soft:#6E685C; --faint:#9A9282; --hairline:#DED6C2;
+    --accent:#B4756B; --accent-pale:#F1E4DF; --accent-hover:#9C6058;
+    --green:#4A7C59; --green-pale:#E4F0E8; --red:#B04040; --red-pale:#F5E0E0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{min-height:100vh;background:var(--page);font-family:'Inter',system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;}
+  @media(prefers-reduced-motion:reduce){*{transition-duration:0.001ms !important;}}
+
+  /* ---- top bar ---- */
+  .topbar{background:var(--card);border-bottom:1px solid var(--hairline);padding:14px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:30;}
+  .topbar .logo{font-family:'Fraunces',serif;font-size:20px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px;}
+  .topbar .logo::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--accent);}
+  .topbar .tagline{font-size:13px;color:var(--soft);}
+  .topbar .grow{flex:1;}
+  .topbar .gen-link{font-family:'Space Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--accent);text-decoration:none;padding:8px 14px;border:1.5px solid var(--accent);border-radius:999px;transition:all 0.12s;}
+  .topbar .gen-link:hover{background:var(--accent);color:#fff;}
+  .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex:0 0 auto;}
+
+  /* ---- section selector ---- */
+  .selector-wrap{max-width:800px;margin:28px auto 0;padding:0 20px;}
+  .selector{display:flex;gap:8px;flex-wrap:wrap;}
+  .sec-btn{font-family:'Space Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:9px 18px;border-radius:999px;border:1.5px solid var(--hairline);background:var(--card);color:var(--soft);cursor:pointer;transition:all 0.14s;}
+  .sec-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .sec-btn.active{background:var(--ink);border-color:var(--ink);color:#F0EAD9;}
+  .sec-btn .ct{display:inline-block;background:var(--accent-pale);color:var(--accent);font-size:10px;padding:1px 6px;border-radius:999px;margin-left:5px;}
+  .sec-btn.active .ct{background:rgba(255,255,255,0.2);color:#fff;}
+
+  /* ---- main content ---- */
+  .content{max-width:800px;margin:20px auto 80px;padding:0 20px;}
+
+  /* ---- section header ---- */
+  .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+  .sec-head h2{font-family:'Fraunces',serif;font-size:26px;font-weight:600;letter-spacing:-0.01em;}
+  .sec-head p{font-size:13.5px;color:var(--soft);margin-top:3px;}
+
+  /* ---- item cards ---- */
+  .item-grid{display:grid;gap:12px;}
+  .item-card{background:var(--card);border:1px solid var(--hairline);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:14px;transition:box-shadow 0.14s;}
+  .item-card:hover{box-shadow:0 4px 16px rgba(27,26,24,0.06);}
+  .item-thumb{width:52px;height:52px;border-radius:10px;object-fit:cover;flex:0 0 52px;border:1px solid var(--hairline);}
+  .item-thumb.empty{background:var(--accent-pale);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--accent);}
+  .theme-mosaic{display:flex;gap:2px;width:52px;height:52px;border-radius:10px;overflow:hidden;flex:0 0 52px;border:1px solid var(--hairline);}
+  .theme-mosaic .m{flex:1;background:var(--accent-pale);}
+  .theme-mosaic img{width:100%;height:100%;object-fit:cover;display:block;}
+  .item-info{flex:1;min-width:0;}
+  .item-name{font-size:15px;font-weight:600;}
+  .item-meta{font-size:12.5px;color:var(--soft);margin-top:2px;}
+  .item-actions{display:flex;gap:6px;}
+  .icon-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--hairline);background:var(--page);color:var(--soft);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.12s;}
+  .icon-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .icon-btn.del:hover{border-color:var(--red);color:var(--red);}
+
+  /* ---- empty state ---- */
+  .empty{text-align:center;padding:48px 20px;color:var(--faint);}
+  .empty .ico{font-size:36px;margin-bottom:12px;}
+  .empty p{font-size:14px;}
+
+  /* ---- add button ---- */
+  .btn{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;border-radius:999px;padding:10px 20px;cursor:pointer;transition:all 0.12s;border:none;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:var(--accent-hover);}
+  .btn-ghost{background:var(--card);border:1.5px solid var(--hairline);color:var(--soft);}
+  .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+  .btn-green{background:var(--green);color:#fff;}
+  .btn-green:hover{opacity:0.9;}
+  .btn-outline{background:var(--card);border:1.5px solid var(--ink);color:var(--ink);}
+  .btn-outline:hover{background:var(--accent-pale);}
+
+  /* ---- import box ---- */
+  .import-box{background:var(--card);border:1.5px dashed var(--hairline);border-radius:16px;padding:22px;}
+  .url-row{display:flex;gap:8px;margin-bottom:14px;}
+  .url-row input{flex:1;font-family:'Inter',sans-serif;font-size:13.5px;padding:10px 13px;border:1.5px solid var(--hairline);border-radius:8px;background:#fff;outline:none;}
+  .url-row input:focus{border-color:var(--accent);}
+  .caption-area{margin-bottom:14px;}
+  .caption-area label{font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--soft);display:block;margin-bottom:6px;}
+  .caption-area textarea{width:100%;font-family:'Inter',sans-serif;font-size:13px;padding:10px 13px;border:1.5px solid var(--hairline);border-radius:8px;background:#fff;min-height:90px;resize:vertical;outline:none;line-height:1.5;}
+  .caption-area textarea:focus{border-color:var(--accent);}
+  .import-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+  .save-as-row{display:flex;align-items:center;gap:8px;}
+  .save-as-row label{font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--soft);}
+  .save-as-row select{font-family:'Inter',sans-serif;font-size:13.5px;padding:9px 12px;border:1.5px solid var(--hairline);border-radius:8px;background:#fff;outline:none;}
+  .ai-result{background:#fff;border:1px solid var(--hairline);border-radius:12px;padding:16px;margin-top:16px;display:none;}
+  .ai-result.show{display:block;}
+  .ai-lbl{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--green);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+  .ai-lbl::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green);}
+  .ai-field{margin-bottom:10px;}
+  .ai-field label{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--soft);display:block;margin-bottom:4px;}
+  .ai-field input,.ai-field textarea{width:100%;font-family:'Inter',sans-serif;font-size:13.5px;padding:8px 10px;border:1.5px solid var(--hairline);border-radius:7px;background:var(--page);outline:none;}
+  .ai-field input:focus,.ai-field textarea:focus{border-color:var(--accent);}
+  .ai-actions{display:flex;gap:8px;margin-top:12px;}
+  .loading-dots{display:inline-flex;gap:4px;align-items:center;}
+  .loading-dots span{width:5px;height:5px;border-radius:50%;background:#fff;animation:dot 1.2s infinite;}
+  .loading-dots span:nth-child(2){animation-delay:0.2s;}
+  .loading-dots span:nth-child(3){animation-delay:0.4s;}
+  @keyframes dot{0%,80%,100%{opacity:0.2;}40%{opacity:1;}}
+
+  /* ---- modal ---- */
+  .overlay{position:fixed;inset:0;background:rgba(27,26,24,0.4);z-index:100;display:none;align-items:flex-end;justify-content:center;padding:0;}
+  .overlay.show{display:flex;}
+  .sheet{width:100%;max-width:600px;background:var(--card);border-radius:22px 22px 0 0;padding:0;max-height:92vh;overflow-y:auto;box-shadow:0 -12px 40px rgba(27,26,24,0.18);}
+  .sheet-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 16px;border-bottom:1px solid var(--hairline);position:sticky;top:0;background:var(--card);border-radius:22px 22px 0 0;z-index:2;}
+  .sheet-head h3{font-family:'Fraunces',serif;font-size:20px;font-weight:600;}
+  .sheet-close{width:30px;height:30px;border-radius:50%;border:none;background:var(--page);color:var(--soft);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .sheet-body{padding:20px 22px;}
+  .sheet-foot{padding:14px 22px 24px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--hairline);position:sticky;bottom:0;background:var(--card);}
+
+  /* ---- form ---- */
+  .form-group{margin-bottom:16px;}
+  .form-group label{display:block;font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--soft);margin-bottom:7px;}
+  .form-group input,.form-group textarea,.form-group select{width:100%;font-family:'Inter',sans-serif;font-size:14px;padding:10px 13px;border:1.5px solid var(--hairline);border-radius:9px;background:#fff;color:var(--ink);outline:none;transition:border-color 0.12s;}
+  .form-group input:focus,.form-group textarea:focus{border-color:var(--accent);}
+  .form-group textarea{resize:vertical;min-height:80px;line-height:1.5;}
+  .form-hint{font-size:12px;color:var(--faint);margin-top:5px;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+  /* ---- image upload ---- */
+  .img-slots{display:grid;gap:10px;}
+  .img-slots.single{grid-template-columns:1fr;}
+  .img-slots.triple{grid-template-columns:repeat(3,1fr);}
+  .img-slot{position:relative;border:1.5px dashed var(--hairline);border-radius:10px;overflow:hidden;background:var(--page);cursor:pointer;transition:border-color 0.15s;}
+  .img-slot:hover{border-color:var(--accent);}
+  .img-slot.has-img{border-style:solid;border-color:var(--hairline);}
+  .img-slot input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:1;}
+  .img-slot .slot-preview{width:100%;aspect-ratio:4/3;object-fit:cover;display:none;border-radius:8px;}
+  .img-slot.has-img .slot-preview{display:block;}
+  .img-slot .slot-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:18px 10px;aspect-ratio:4/3;pointer-events:none;}
+  .img-slot.has-img .slot-empty{display:none;}
+  .slot-icon{font-size:18px;color:var(--faint);}
+  .slot-label{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--faint);text-align:center;}
+  .img-slot .slot-url-row{display:flex;gap:6px;padding:8px;border-top:1px solid var(--hairline);background:#fff;position:relative;z-index:2;}
+  .img-slot .slot-url-row input{flex:1;font-size:12px;font-family:'Inter',sans-serif;padding:6px 8px;border:1px solid var(--hairline);border-radius:6px;outline:none;}
+  .img-slot .slot-url-row input:focus{border-color:var(--accent);}
+  .img-slot .slot-url-btn{font-size:11px;font-weight:700;font-family:'Space Mono',monospace;white-space:nowrap;background:var(--ink);color:#fff;border:none;border-radius:6px;padding:6px 9px;cursor:pointer;}
+  .img-slot .slot-clear{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:rgba(27,26,24,0.55);color:#fff;border:none;font-size:13px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:3;}
+  .img-slot.has-img .slot-clear{display:flex;}
+
+  /* ---- difficulty selector ---- */
+  .diff-row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .diff-opt{ display:none; }
+  .diff-lbl{ display:flex; flex-direction:column; gap:3px; padding:10px 14px; border:1.5px solid var(--hairline); border-radius:10px; cursor:pointer; transition:all 0.14s; font-size:13px; font-weight:600; flex:1; min-width:100px; }
+  .diff-lbl:hover{ border-color:var(--accent); background:var(--accent-pale); }
+  .diff-opt:checked + .diff-lbl{ border-color:var(--accent); background:var(--accent-pale); color:var(--accent-hover); }
+  .diff-lbl .diff-name{ font-size:13px; font-weight:700; }
+  .diff-lbl .diff-time{ font-size:11px; font-weight:400; color:var(--soft); margin-top:1px; }
+  .diff-opt:checked + .diff-lbl .diff-time{ color:var(--accent); }
+
+  /* ---- supply list ---- */
+  .supply-list{border:1.5px solid var(--hairline);border-radius:9px;background:#fff;overflow:hidden;}
+  .supply-list:focus-within{border-color:var(--accent);}
+  .supply-row{display:flex;align-items:center;border-bottom:1px solid var(--hairline);}
+  .supply-row:last-child{border-bottom:none;}
+  .supply-check{width:36px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .supply-check-box{width:15px;height:15px;border:1.5px solid var(--hairline);border-radius:3px;pointer-events:none;}
+  .supply-qty{width:72px;flex:0 0 72px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:10px 8px;border:none;outline:none;background:transparent;color:var(--soft);}
+  .supply-qty::placeholder{color:#CFC7B8;font-weight:400;}
+  .supply-name{flex:1;font-family:'Inter',sans-serif;font-size:13.5px;padding:10px 10px;border:none;outline:none;background:transparent;color:var(--ink);}
+  .supply-name::placeholder{color:#CFC7B8;}
+  .supply-del{width:32px;flex:0 0 32px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:var(--hairline);font-size:16px;cursor:pointer;transition:color 0.12s;}
+  .supply-del:hover{color:var(--red);}
+  .supply-add-row{display:flex;align-items:center;padding:9px 12px;background:var(--page);border-top:1px solid var(--hairline);}
+  .supply-add-btn{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--accent);background:none;border:none;cursor:pointer;padding:0;}
+
+  /* ---- toast ---- */
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#E9E2CF;font-size:13px;font-weight:500;padding:11px 18px;border-radius:10px;z-index:200;transform:translateY(60px);opacity:0;transition:all 0.25s;pointer-events:none;}
+  .toast.show{transform:translateY(0);opacity:1;}
+  .toast.ok{background:var(--green);}
+</style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="logo">Girls Night In</div>
+    <span class="tagline">Content manager</span>
+    <div class="grow"></div>
+    <span class="sync-dot"></span>
+    <span style="font-size:12px;color:var(--green);font-weight:500;">Live sync on</span>
+    <a href="craft-night-generator.html" class="gen-link">→ Open generator</a>
+  </div>
+
+  <!-- SECTION SELECTOR -->
+  <div class="selector-wrap">
+    <div class="selector">
+      <button class="sec-btn active" data-sec="craft">Crafts <span class="ct" id="ct-craft">0</span></button>
+      <button class="sec-btn" data-sec="food">Food <span class="ct" id="ct-food">0</span></button>
+      <button class="sec-btn" data-sec="drink">Drinks <span class="ct" id="ct-drink">0</span></button>
+      <button class="sec-btn" data-sec="theme">Themes <span class="ct" id="ct-theme">0</span></button>
+      <button class="sec-btn" data-sec="import">Import from reel</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- CRAFTS -->
+    <div id="sec-craft" class="sec-panel">
+      <div class="sec-head">
+        <div><h2>Crafts</h2><p>What everyone makes on the night.</p></div>
+        <button class="btn btn-primary" onclick="openAdd('craft')">+ Add craft</button>
+      </div>
+      <div class="item-grid" id="list-craft"></div>
+    </div>
+
+    <!-- FOOD -->
+    <div id="sec-food" class="sec-panel" style="display:none">
+      <div class="sec-head">
+        <div><h2>Food</h2><p>Snacks, bites and boards.</p></div>
+        <button class="btn btn-primary" onclick="openAdd('food')">+ Add food</button>
+      </div>
+      <div class="item-grid" id="list-food"></div>
+    </div>
+
+    <!-- DRINKS -->
+    <div id="sec-drink" class="sec-panel" style="display:none">
+      <div class="sec-head">
+        <div><h2>Drinks</h2><p>What's in everyone's glass.</p></div>
+        <button class="btn btn-primary" onclick="openAdd('drink')">+ Add drink</button>
+      </div>
+      <div class="item-grid" id="list-drink"></div>
+    </div>
+
+    <!-- THEMES -->
+    <div id="sec-theme" class="sec-panel" style="display:none">
+      <div class="sec-head">
+        <div><h2>Themes</h2><p>The mood and vibe of each night.</p></div>
+        <button class="btn btn-primary" onclick="openAdd('theme')">+ Add theme</button>
+      </div>
+      <div class="item-grid" id="list-theme"></div>
+    </div>
+
+    <!-- IMPORT -->
+    <div id="sec-import" class="sec-panel" style="display:none">
+      <div class="sec-head">
+        <div><h2>Import from reel</h2><p>Paste a caption and let AI extract the details.</p></div>
+      </div>
+      <div class="import-box">
+        <div class="url-row">
+          <input type="url" id="reel-url" placeholder="https://www.instagram.com/reel/...">
+          <button class="btn btn-ghost" onclick="window.open(document.getElementById('reel-url').value,'_blank')">Open ↗</button>
+        </div>
+        <div class="caption-area">
+          <label>Paste caption or description</label>
+          <textarea id="reel-caption" placeholder="Paste anything — caption, description, ingredients list. Claude will pull out what it needs."></textarea>
+        </div>
+        <div class="import-footer">
+          <div class="save-as-row">
+            <label>Save as</label>
+            <select id="reel-type">
+              <option value="craft">Craft idea</option>
+              <option value="food">Food idea</option>
+              <option value="drink">Drink idea</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="extractBtn" onclick="extractFromCaption()">Extract with AI →</button>
+        </div>
+        <div class="ai-result" id="ai-result">
+          <div class="ai-lbl">Extracted — edit before saving</div>
+          <div class="ai-field"><label>Name</label><input type="text" id="ai-name"></div>
+          <div class="ai-field"><label>Vibe / description</label><input type="text" id="ai-desc"></div>
+          <div class="ai-field"><label>Photo keyword</label><input type="text" id="ai-kw"></div>
+          <div class="ai-field"><label>Supplies / ingredients (one per line)</label>
+            <textarea id="ai-supplies" rows="5"></textarea>
+          </div>
+          <div class="ai-actions">
+            <button class="btn btn-green" onclick="saveFromAI()">Save to library</button>
+            <button class="btn btn-ghost" onclick="document.getElementById('ai-result').classList.remove('show')">Discard</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;" id="reel-log-wrap">
+        <div class="sec-head" style="margin-bottom:12px;"><div><h2 style="font-size:18px;">Imported reels</h2></div></div>
+        <div class="item-grid" id="reel-log"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM SHEET MODAL -->
+  <div class="overlay" id="addModal">
+    <div class="sheet">
+      <div class="sheet-head">
+        <h3 id="modal-title">Add craft</h3>
+        <button class="sheet-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="sheet-body">
+        <div class="form-group"><label>Name</label><input type="text" id="f-name" placeholder="e.g. Hand-poured candles"></div>
+        <div class="form-group"><label>Vibe / description</label><input type="text" id="f-desc" placeholder="e.g. mellow, meditative, beginner-friendly"></div>
+
+        <!-- single image -->
+        <div class="form-group" id="fg-single-img">
+          <label>Photo</label>
+          <div class="img-slots single">
+            <div class="img-slot" id="slot-0">
+              <input type="file" accept="image/*" data-slot="0">
+              <img class="slot-preview" id="prev-0" alt="">
+              <button class="slot-clear" data-slot="0">×</button>
+              <div class="slot-empty"><div class="slot-icon">↑</div><div class="slot-label">Upload or paste URL</div></div>
+              <div class="slot-url-row" onclick="event.stopPropagation()">
+                <input type="url" id="url-0" placeholder="Paste image URL">
+                <button class="slot-url-btn" onclick="applyUrl(0)">Use</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- theme triple images -->
+        <div class="form-group" id="fg-theme-imgs" style="display:none">
+          <label>Moodboard <span style="font-weight:400;text-transform:none;letter-spacing:0">(3 photos tiled in the generator)</span></label>
+          <div class="img-slots triple">
+            <div class="img-slot" id="slot-0t">
+              <input type="file" accept="image/*" data-slot="0t">
+              <img class="slot-preview" id="prev-0t" alt="">
+              <button class="slot-clear" data-slot="0t">×</button>
+              <div class="slot-empty"><div class="slot-icon">↑</div><div class="slot-label">Craft</div></div>
+              <div class="slot-url-row" onclick="event.stopPropagation()"><input type="url" id="url-0t" placeholder="URL"><button class="slot-url-btn" onclick="applyUrl('0t')">Use</button></div>
+            </div>
+            <div class="img-slot" id="slot-1t">
+              <input type="file" accept="image/*" data-slot="1t">
+              <img class="slot-preview" id="prev-1t" alt="">
+              <button class="slot-clear" data-slot="1t">×</button>
+              <div class="slot-empty"><div class="slot-icon">↑</div><div class="slot-label">Food</div></div>
+              <div class="slot-url-row" onclick="event.stopPropagation()"><input type="url" id="url-1t" placeholder="URL"><button class="slot-url-btn" onclick="applyUrl('1t')">Use</button></div>
+            </div>
+            <div class="img-slot" id="slot-2t">
+              <input type="file" accept="image/*" data-slot="2t">
+              <img class="slot-preview" id="prev-2t" alt="">
+              <button class="slot-clear" data-slot="2t">×</button>
+              <div class="slot-empty"><div class="slot-icon">↑</div><div class="slot-label">Vibe</div></div>
+              <div class="slot-url-row" onclick="event.stopPropagation()"><input type="url" id="url-2t" placeholder="URL"><button class="slot-url-btn" onclick="applyUrl('2t')">Use</button></div>
+            </div>
+          </div>
+          <div class="form-hint">One for craft feel · one for food/atmosphere · one for texture/color</div>
+        </div>
+
+        <!-- theme vibe -->
+        <div class="form-group" id="fg-theme-vibe" style="display:none">
+          <label>Vibe tagline</label>
+          <input type="text" id="f-vibe" placeholder="e.g. cozy & full">
+        </div>
+
+        <!-- supplies -->
+        <!-- difficulty (craft only) -->
+        <div class="form-group" id="fg-difficulty" style="display:none">
+          <label>Difficulty</label>
+          <div class="diff-row">
+            <input type="radio" name="difficulty" id="diff-easy" class="diff-opt" value="easy">
+            <label for="diff-easy" class="diff-lbl"><span class="diff-name">Easy</span><span class="diff-time">30 min – 1 hr</span></label>
+            <input type="radio" name="difficulty" id="diff-medium" class="diff-opt" value="medium">
+            <label for="diff-medium" class="diff-lbl"><span class="diff-name">Medium</span><span class="diff-time">1 – 2 hrs</span></label>
+            <input type="radio" name="difficulty" id="diff-hard" class="diff-opt" value="hard">
+            <label for="diff-hard" class="diff-lbl"><span class="diff-name">Difficult</span><span class="diff-time">2 – 4 hrs</span></label>
+          </div>
+        </div>
+
+        <div class="form-group" id="fg-supplies">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:7px;flex-wrap:wrap;">
+            <label style="margin:0;">Supplies / ingredients</label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <label style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--soft);">Amounts are for</label>
+              <div style="display:flex;align-items:center;gap:6px;background:var(--page);border:1.5px solid var(--hairline);border-radius:8px;padding:4px 8px;">
+                <button type="button" id="base-minus" style="width:22px;height:22px;border-radius:50%;border:1px solid var(--hairline);background:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+                <span id="base-count" style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;min-width:14px;text-align:center;">4</span>
+                <button type="button" id="base-plus" style="width:22px;height:22px;border-radius:50%;border:1px solid var(--hairline);background:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+              </div>
+              <label style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--soft);">people</label>
+            </div>
+          </div>
+          <div class="supply-list" id="supply-list"></div>
+          <div class="form-hint">Qty is optional — e.g. "2 lbs", "1 bunch"</div>
+        </div>
+
+        <!-- instructions (craft only) -->
+        <div class="form-group" id="fg-instructions" style="display:none">
+          <label>Instructions <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+          <textarea id="f-instructions" rows="4" placeholder="Step-by-step instructions..."></textarea>
+        </div>
+
+        <div class="form-group"><label>Source URL <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label><input type="url" id="f-url" placeholder="https://..."></div>
+      </div>
+      <div class="sheet-foot">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveItem()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var SUPA_URL = 'https://stuarkbtyovbhnyvssbs.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0dWFya2J0eW92YmhueXZzc2JzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjEyNzMsImV4cCI6MjA5ODU5NzI3M30.yHxlpFuswOOOjmRHZzl7iI9SnBJ-TuNDYQ3a1K7L9_8';
+
+  function supa(path, opts){
+    return fetch(SUPA_URL + '/rest/v1/' + path, Object.assign({
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + SUPA_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      }
+    }, opts)).then(function(r){ return r.json(); });
+  }
+
+  function supaGet(table){
+    return supa(table + '?select=*&order=created_at.asc');
+  }
+  function supaInsert(table, row){
+    return supa(table, { method:'POST', body: JSON.stringify(row) });
+  }
+  function supaUpdate(table, id, row){
+    return supa(table + '?id=eq.' + id, { method:'PATCH', body: JSON.stringify(row) });
+  }
+  function supaDelete(table, id){
+    return supa(table + '?id=eq.' + id, { method:'DELETE' });
+  }
+
+  // map our type names to table names
+  var TABLES = { craft:'crafts', food:'foods', drink:'drinks', theme:'themes' };
+
+  // local cache
+  var db = { craft:[], food:[], drink:[], theme:[], reels:[] };
+
+  var currentSec = 'craft';
+  var editingId = null, editingType = null;
+  var pendingTags = [], pendingImages = {};
+  var baseServes = 4;
+
+  function el(id){ return document.getElementById(id); }
+
+  // ── normalise row from Supabase → our internal shape ──
+  function fromRow(row, type){
+    return {
+      id: row.id,
+      name: row.name,
+      desc: row.description,
+      difficulty: row.difficulty,
+      baseServes: row.base_serves,
+      supplies: row.supplies || [],
+      instructions: row.instructions,
+      image: row.image,
+      images: row.images,
+      vibe: row.vibe,
+      palette: row.palette,
+      bg: row.bg,
+      ink: row.ink,
+      source: row.source,
+      url: row.url
+    };
+  }
+
+  // ── normalise our shape → Supabase row ──
+  function toRow(item, type){
+    var row = {
+      name: item.name,
+      description: item.desc,
+      source: item.source || 'manual',
+      url: item.url || null
+    };
+    if(type === 'theme'){
+      row.vibe = item.vibe || null;
+      row.images = item.images || [];
+      row.palette = item.palette || [];
+      row.bg = item.bg || null;
+      row.ink = item.ink || null;
+    } else {
+      row.supplies = item.supplies || [];
+      row.base_serves = item.baseServes || 4;
+      row.image = item.image || null;
+    }
+    if(type === 'craft'){
+      row.difficulty = item.difficulty || null;
+      row.instructions = item.instructions || null;
+    }
+    return row;
+  }
+
+  // ── load all data ──
+  async function loadAll(){
+    try {
+      var [crafts, foods, drinks, themes, reels] = await Promise.all([
+        supaGet('crafts'), supaGet('foods'), supaGet('drinks'), supaGet('themes'),
+        supa('reels?select=*&order=created_at.desc')
+      ]);
+      db.craft  = (crafts  || []).map(function(r){ return fromRow(r,'craft');  });
+      db.food   = (foods   || []).map(function(r){ return fromRow(r,'food');   });
+      db.drink  = (drinks  || []).map(function(r){ return fromRow(r,'drink');  });
+      db.theme  = (themes  || []).map(function(r){ return fromRow(r,'theme');  });
+      db.reels  = reels || [];
+      render();
+    } catch(e) { console.error('Load failed', e); toast('Could not connect to database'); }
+  }
+
+  // ── section tabs ──
+  document.querySelectorAll('.sec-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.sec-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      currentSec = btn.dataset.sec;
+      document.querySelectorAll('.sec-panel').forEach(function(p){ p.style.display='none'; });
+      el('sec-' + currentSec).style.display = 'block';
+    });
+  });
+
+  // ── render ──
+  function render(){
+    ['craft','food','drink','theme'].forEach(function(t){
+      var ctEl = el('ct-' + t); if(ctEl) ctEl.textContent = db[t].length;
+      var listEl = el('list-' + t); if(!listEl) return;
+      listEl.innerHTML = '';
+      if(!db[t].length){ listEl.innerHTML = '<div class="empty"><div class="ico">✦</div><p>Nothing here yet.</p></div>'; return; }
+      db[t].forEach(function(item){ listEl.appendChild(buildCard(item, t)); });
+    });
+    renderReelLog();
+  }
+
+  function buildCard(item, type){
+    var card = document.createElement('div'); card.className = 'item-card';
+    var thumb;
+    if(type==='theme' && item.images && item.images.some(Boolean)){
+      thumb = document.createElement('div'); thumb.className = 'theme-mosaic';
+      (item.images||[]).forEach(function(src){
+        var d = document.createElement('div'); d.className = 'm';
+        if(src){ var img=document.createElement('img'); img.src=src; d.appendChild(img); }
+        thumb.appendChild(d);
+      });
+    } else if(item.image){
+      thumb = document.createElement('img'); thumb.className = 'item-thumb'; thumb.src = item.image; thumb.alt = '';
+    } else {
+      thumb = document.createElement('div'); thumb.className = 'item-thumb empty';
+      thumb.textContent = type==='craft'?'✦':type==='food'?'◉':type==='drink'?'◎':'◈';
+    }
+    var info = document.createElement('div'); info.className = 'item-info';
+    var name = document.createElement('div'); name.className = 'item-name'; name.textContent = item.name;
+    var meta = document.createElement('div'); meta.className = 'item-meta';
+    var parts = [];
+    if(item.desc) parts.push(item.desc);
+    if(item.difficulty) parts.push(item.difficulty);
+    if(item.baseServes) parts.push('for ' + item.baseServes);
+    if(item.supplies && item.supplies.length) parts.push(item.supplies.length + ' items');
+    if(item.source === 'insta') parts.push('from reel');
+    meta.textContent = parts.join(' · ');
+    info.appendChild(name); info.appendChild(meta);
+    var acts = document.createElement('div'); acts.className = 'item-actions';
+    var eb = document.createElement('button'); eb.className = 'icon-btn'; eb.textContent = '✎';
+    eb.onclick = function(){ openEdit(type, item.id); };
+    var db2 = document.createElement('button'); db2.className = 'icon-btn del'; db2.textContent = '✕';
+    db2.onclick = function(){ deleteItem(type, item.id); };
+    acts.appendChild(eb); acts.appendChild(db2);
+    card.appendChild(thumb); card.appendChild(info); card.appendChild(acts);
+    return card;
+  }
+
+  function renderReelLog(){
+    var log = el('reel-log'); if(!log) return; log.innerHTML = '';
+    if(!db.reels.length){ log.innerHTML = '<div class="empty"><div class="ico">◎</div><p>No reels imported yet.</p></div>'; return; }
+    db.reels.forEach(function(r){
+      var card = document.createElement('div'); card.className = 'item-card';
+      var thumb = document.createElement('div'); thumb.className = 'item-thumb empty'; thumb.textContent = '▲';
+      var info = document.createElement('div'); info.className = 'item-info';
+      var name = document.createElement('div'); name.className = 'item-name'; name.textContent = r.name || 'Untitled';
+      var meta = document.createElement('div'); meta.className = 'item-meta'; meta.textContent = (r.url||'No URL') + ' · ' + r.type;
+      info.appendChild(name); info.appendChild(meta);
+      card.appendChild(thumb); card.appendChild(info);
+      log.appendChild(card);
+    });
+  }
+
+  // ── add / edit modal ──
+  window.openAdd = function(type){
+    editingId = null; editingType = type; pendingTags = []; pendingImages = {};
+    el('modal-title').textContent = 'Add ' + type;
+    el('f-name').value=''; el('f-desc').value=''; el('f-url').value=''; el('f-vibe').value=''; el('f-instructions').value='';
+    el('fg-single-img').style.display = type!=='theme'?'block':'none';
+    el('fg-theme-imgs').style.display = type==='theme'?'block':'none';
+    el('fg-theme-vibe').style.display = type==='theme'?'block':'none';
+    el('fg-supplies').style.display   = type!=='theme'?'block':'none';
+    el('fg-difficulty').style.display = type==='craft'?'block':'none';
+    el('fg-instructions').style.display = type==='craft'?'block':'none';
+    document.querySelectorAll('.diff-opt').forEach(function(r){ r.checked=false; });
+    baseServes = 4; el('base-count').textContent = baseServes;
+    clearAllSlots(); renderSupplies();
+    el('addModal').classList.add('show');
+    setTimeout(function(){ attachSlotListeners(); el('f-name').focus(); }, 60);
+  };
+
+  window.openEdit = function(type, id){
+    var item = db[type].find(function(i){ return i.id===id; }); if(!item) return;
+    editingId = id; editingType = type; pendingImages = {};
+    pendingTags = (item.supplies||[]).map(function(s){
+      if(typeof s === 'object') return s;
+      var m = s.match(/^(\d[\d\/\s]*(?:lbs?|oz|cups?|tbsp|tsp|bunches?|cans?|bottles?|g|kg|ml|l|x\d+)?)?\s*(.+)$/i);
+      return m&&m[1] ? {qty:m[1].trim(), name:m[2].trim()} : {qty:'', name:s};
+    });
+    el('modal-title').textContent = 'Edit ' + type;
+    el('f-name').value=item.name||''; el('f-desc').value=item.desc||''; el('f-url').value=item.url||'';
+    el('f-vibe').value=item.vibe||''; el('f-instructions').value=item.instructions||'';
+    el('fg-single-img').style.display   = type!=='theme'?'block':'none';
+    el('fg-theme-imgs').style.display   = type==='theme'?'block':'none';
+    el('fg-theme-vibe').style.display   = type==='theme'?'block':'none';
+    el('fg-supplies').style.display     = type!=='theme'?'block':'none';
+    el('fg-difficulty').style.display   = type==='craft'?'block':'none';
+    el('fg-instructions').style.display = type==='craft'?'block':'none';
+    document.querySelectorAll('.diff-opt').forEach(function(r){ r.checked=(r.value===item.difficulty); });
+    baseServes = item.baseServes||4; el('base-count').textContent = baseServes;
+    clearAllSlots();
+    if(type==='theme'){ (item.images||[]).forEach(function(src,i){ if(src) setSlotImage(i+'t',src); }); }
+    else if(item.image){ setSlotImage(0, item.image); }
+    renderSupplies();
+    el('addModal').classList.add('show');
+    setTimeout(attachSlotListeners, 60);
+  };
+
+  window.closeModal = function(){ el('addModal').classList.remove('show'); };
+  el('addModal').addEventListener('click', function(e){ if(e.target===el('addModal')) closeModal(); });
+
+  window.saveItem = async function(){
+    var name = el('f-name').value.trim();
+    if(!name){ el('f-name').style.borderColor='var(--red)'; el('f-name').focus(); return; }
+    el('f-name').style.borderColor = '';
+    var diffEl = document.querySelector('.diff-opt:checked');
+    var item = {
+      name: name,
+      desc: el('f-desc').value.trim(),
+      difficulty: diffEl ? diffEl.value : null,
+      baseServes: baseServes,
+      instructions: el('f-instructions').value.trim(),
+      supplies: getSuppliesForSave(),
+      url: el('f-url').value.trim(),
+      vibe: el('f-vibe').value.trim(),
+      source: 'manual'
+    };
+    if(editingType==='theme'){ item.images=[pendingImages['0t']||null,pendingImages['1t']||null,pendingImages['2t']||null]; }
+    else { item.image = pendingImages[0]||null; }
+
+    try{
+      var table = TABLES[editingType];
+      if(editingId){
+        await supaUpdate(table, editingId, toRow(item, editingType));
+        toast('Saved', true);
+      } else {
+        await supaInsert(table, toRow(item, editingType));
+        toast('Added', true);
+      }
+      closeModal();
+      await loadAll();
+    } catch(e){ console.error(e); toast('Save failed'); }
+  };
+
+  window.deleteItem = async function(type, id){
+    if(!confirm('Remove this from the generator?')) return;
+    try{
+      await supaDelete(TABLES[type], id);
+      await loadAll();
+      toast('Deleted');
+    } catch(e){ toast('Delete failed'); }
+  };
+
+  // ── image slots ──
+  function clearAllSlots(){
+    pendingImages = {};
+    ['0','0t','1t','2t'].forEach(function(k){
+      var slot=el('slot-'+k); if(!slot) return;
+      slot.classList.remove('has-img');
+      var prev=el('prev-'+k); if(prev) prev.src='';
+      var urlIn=el('url-'+k); if(urlIn) urlIn.value='';
+    });
+  }
+  function setSlotImage(key, src){
+    pendingImages[key] = src;
+    var slot=el('slot-'+key); var prev=el('prev-'+key);
+    if(!slot||!prev) return;
+    prev.src = src; slot.classList.add('has-img');
+  }
+  window.applyUrl = function(key){
+    var v=(el('url-'+key)||{}).value; if(v&&v.trim()) setSlotImage(key, v.trim());
+  };
+  function attachSlotListeners(){
+    document.querySelectorAll('.img-slot input[type=file]').forEach(function(input){
+      input.onchange = function(){
+        var file=input.files[0]; if(!file) return;
+        var reader=new FileReader();
+        reader.onload=function(e){ setSlotImage(input.dataset.slot, e.target.result); };
+        reader.readAsDataURL(file);
+      };
+    });
+    document.querySelectorAll('.slot-clear').forEach(function(btn){
+      btn.onclick = function(e){
+        e.stopPropagation();
+        var k=btn.dataset.slot; delete pendingImages[k];
+        var slot=el('slot-'+k); var prev=el('prev-'+k);
+        if(slot) slot.classList.remove('has-img'); if(prev) prev.src='';
+      };
+    });
+  }
+
+  // ── supply checklist ──
+  function normalizeSupply(s){ return typeof s==='object'&&s!==null ? s : {qty:'',name:s}; }
+  function renderSupplies(){
+    var list=el('supply-list'); list.innerHTML='';
+    var items=pendingTags.map(normalizeSupply);
+    items.forEach(function(item,i){
+      var row=document.createElement('div'); row.className='supply-row';
+      var chk=document.createElement('div'); chk.className='supply-check';
+      var box=document.createElement('div'); box.className='supply-check-box'; chk.appendChild(box);
+      var qty=document.createElement('input'); qty.className='supply-qty'; qty.type='text'; qty.placeholder='Qty'; qty.value=item.qty||'';
+      qty.oninput=function(){ items[i].qty=qty.value; syncPending(items); };
+      var name=document.createElement('input'); name.className='supply-name'; name.type='text'; name.placeholder='Item name'; name.value=item.name||'';
+      name.oninput=function(){ items[i].name=name.value; syncPending(items); };
+      name.onkeydown=function(e){ if(e.key==='Enter'){ e.preventDefault(); addSupplyRow(); } };
+      var del=document.createElement('button'); del.className='supply-del'; del.innerHTML='&times;';
+      del.onclick=function(){ pendingTags.splice(i,1); renderSupplies(); };
+      row.appendChild(chk); row.appendChild(qty); row.appendChild(name); row.appendChild(del);
+      list.appendChild(row);
+    });
+    var addRow=document.createElement('div'); addRow.className='supply-add-row';
+    var addBtn=document.createElement('button'); addBtn.className='supply-add-btn'; addBtn.textContent='+ Add item';
+    addBtn.onclick=addSupplyRow; addRow.appendChild(addBtn); list.appendChild(addRow);
+  }
+  function addSupplyRow(){
+    pendingTags.push({qty:'',name:''}); renderSupplies();
+    var rows=el('supply-list').querySelectorAll('.supply-name');
+    if(rows.length) rows[rows.length-1].focus();
+  }
+  function syncPending(items){ pendingTags=items.slice(); }
+  function getSuppliesForSave(){
+    return pendingTags.map(normalizeSupply).filter(function(s){ return s.name.trim(); }).map(function(s){
+      return s.qty.trim() ? s.qty.trim()+' '+s.name.trim() : s.name.trim();
+    });
+  }
+
+  // ── base serves stepper ──
+  document.addEventListener('click', function(e){
+    if(e.target.id==='base-minus'){ baseServes=Math.max(1,baseServes-1); el('base-count').textContent=baseServes; }
+    if(e.target.id==='base-plus'){ baseServes=Math.min(30,baseServes+1); el('base-count').textContent=baseServes; }
+  });
+
+  // ── AI extract ──
+  window.extractFromCaption = async function(){
+    var caption=el('reel-caption').value.trim(); var type=el('reel-type').value;
+    if(!caption){ el('reel-caption').style.borderColor='var(--red)'; return; }
+    el('reel-caption').style.borderColor='';
+    var btn=el('extractBtn'); btn.innerHTML='<span class="loading-dots"><span></span><span></span><span></span></span>'; btn.disabled=true;
+    var prompt='Extract details from this '+type+' description for a girls night in planning app. Return ONLY JSON, no markdown:\n{"name":"Short catchy name (3-5 words)","desc":"Vibe in 3-5 words","kw":"1-3 photo search keywords","supplies":["item with qty"...]}\n\nText:\n'+caption;
+    try{
+      var resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+      var data=await resp.json();
+      var text=data.content.filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
+      var json=JSON.parse(text.replace(/```json|```/g,'').trim());
+      el('ai-name').value=json.name||''; el('ai-desc').value=json.desc||''; el('ai-kw').value=json.kw||'';
+      el('ai-supplies').value=(json.supplies||[]).join('\n');
+      el('ai-result').classList.add('show');
+    }catch(e){ toast('Could not extract — try again'); }
+    btn.innerHTML='Extract with AI →'; btn.disabled=false;
+  };
+
+  window.saveFromAI = async function(){
+    var type=el('reel-type').value; var name=el('ai-name').value.trim(); if(!name) return;
+    var item={
+      name:name, desc:el('ai-desc').value.trim(),
+      supplies:el('ai-supplies').value.split('\n').map(function(s){return s.trim();}).filter(Boolean),
+      url:el('reel-url').value.trim(), source:'insta'
+    };
+    try{
+      await supaInsert(TABLES[type], toRow(item, type));
+      await supa('reels', {method:'POST', body:JSON.stringify({name:name,url:item.url,type:type})});
+      el('ai-result').classList.remove('show'); el('reel-caption').value=''; el('reel-url').value='';
+      await loadAll();
+      toast('Saved to '+type+'s', true);
+    }catch(e){ toast('Save failed'); }
+  };
+
+  // ── toast ──
+  function toast(msg, ok){
+    var t=el('toast'); t.textContent=msg; t.className='toast'+(ok?' ok':'');
+    setTimeout(function(){ t.classList.add('show'); },10);
+    setTimeout(function(){ t.classList.remove('show'); },2200);
+  }
+
+  loadAll();
+})();
+</script>
+</body>
+</html>
