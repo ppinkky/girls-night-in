@@ -139,6 +139,64 @@
   .mb-actions{ display:flex; gap:12px; margin-top:20px; }
   .mb-actions .btn{ flex:1; text-align:center; }
 
+  /* ---- accordions ---- */
+  .accordions{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+  .accordion{ background:var(--card); border:1px solid var(--hairline); border-radius:14px; overflow:hidden; }
+  .accordion-head{ display:flex; align-items:center; gap:14px; padding:14px 16px; cursor:pointer; user-select:none; }
+  .accordion-head:hover{ background:#F6F2E8; }
+  .accordion-thumb{ width:52px; height:52px; border-radius:10px; object-fit:cover; flex:0 0 52px; border:1px solid var(--hairline); background:var(--accent-pale); display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--accent); overflow:hidden; }
+  .accordion-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .accordion-title{ flex:1; min-width:0; }
+  .accordion-cat{ font-family:'Space Mono',monospace; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--accent); }
+  .accordion-name{ font-size:15px; font-weight:700; margin-top:2px; }
+  .accordion-meta{ display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+  .accordion-badge{ font-family:'Space Mono',monospace; font-size:10px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; padding:2px 8px; border-radius:999px; }
+  .acc-easy{ background:#E4F0E8; color:#3A6448; }
+  .acc-medium{ background:#FBF3D0; color:#8A6500; }
+  .acc-hard{ background:#F5E0E0; color:#8A3030; }
+  .accordion-chevron{ font-size:12px; color:var(--faint); transition:transform 0.2s ease; flex:0 0 auto; }
+  .accordion.open .accordion-chevron{ transform:rotate(180deg); }
+  .accordion-body{ max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+  .accordion.open .accordion-body{ max-height:600px; }
+  .accordion-inner{ padding:0 16px 16px; border-top:1px solid var(--hairline); }
+  .acc-section{ margin-top:14px; }
+  .acc-section-label{ font-family:'Space Mono',monospace; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--faint); margin-bottom:8px; }
+  .acc-desc{ font-size:14.5px; line-height:1.55; color:var(--ink); }
+  .acc-instructions{ font-size:14px; line-height:1.65; color:var(--soft); white-space:pre-line; }
+  .acc-supply-list{ list-style:none; margin:0; padding:0; }
+  .acc-supply-list li{ display:flex; align-items:center; gap:9px; padding:5px 0; font-size:14px; font-weight:500; border-bottom:1px solid var(--hairline); }
+  .acc-supply-list li:last-child{ border-bottom:none; }
+  .acc-supply-list li::before{ content:""; width:13px; height:13px; border:1.5px solid var(--ink); border-radius:3px; flex:0 0 auto; }
+
+  /* ---- accordions ---- */
+  .accordions{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+  .accordion{ background:var(--card); border:1px solid var(--hairline); border-radius:14px; overflow:hidden; }
+  .accordion-head{ display:flex; align-items:center; gap:14px; padding:14px 16px; cursor:pointer; user-select:none; transition:background 0.12s; }
+  .accordion-head:hover{ background:#F6F2E8; }
+  .accordion-thumb{ width:52px; height:52px; border-radius:10px; flex:0 0 52px; border:1px solid var(--hairline); background:var(--accent-pale); display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--accent); overflow:hidden; }
+  .accordion-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .accordion-title{ flex:1; min-width:0; }
+  .accordion-cat{ font-family:'Space Mono',monospace; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--accent); }
+  .accordion-name{ font-size:15px; font-weight:700; margin-top:2px; }
+  .accordion-meta{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:4px; }
+  .accordion-badge{ font-family:'Space Mono',monospace; font-size:10px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; padding:2px 8px; border-radius:999px; }
+  .acc-easy{ background:#E4F0E8; color:#3A6448; }
+  .acc-medium{ background:#FBF3D0; color:#8A6500; }
+  .acc-hard{ background:#F5E0E0; color:#8A3030; }
+  .accordion-chevron{ font-size:11px; color:var(--faint); transition:transform 0.2s ease; flex:0 0 auto; }
+  .accordion.open .accordion-chevron{ transform:rotate(180deg); }
+  .accordion-body{ max-height:0; overflow:hidden; transition:max-height 0.35s ease; }
+  .accordion.open .accordion-body{ max-height:700px; }
+  .accordion-inner{ padding:0 16px 16px; border-top:1px solid var(--hairline); }
+  .acc-section{ margin-top:14px; }
+  .acc-section-label{ font-family:'Space Mono',monospace; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--faint); margin-bottom:7px; }
+  .acc-desc{ font-size:14.5px; line-height:1.55; color:var(--ink); }
+  .acc-instructions{ font-size:14px; line-height:1.65; color:var(--soft); white-space:pre-line; }
+  .acc-supply-list{ list-style:none; margin:0; padding:0; }
+  .acc-supply-list li{ display:flex; align-items:center; gap:9px; padding:6px 0; font-size:14px; font-weight:500; border-bottom:1px solid var(--hairline); }
+  .acc-supply-list li:last-child{ border-bottom:none; }
+  .acc-supply-list li::before{ content:""; width:13px; height:13px; border:1.5px solid var(--ink); border-radius:3px; flex:0 0 auto; }
+
   .foot{ text-align:center; margin-top:22px; font-family:'Space Mono',monospace; font-size:11.5px; color:var(--soft); }
   .foot b{ color:var(--accent); font-weight:700; }
 
@@ -228,20 +286,7 @@
         </div>
       </div>
 
-      <div class="mb-grid">
-        <div class="mb-tile">
-          <div class="imgw"><img id="mb-craft" alt=""><div class="fb">C</div></div>
-          <div class="cap"><div class="cat">Craft</div><div class="val" id="mbCraftVal">—</div></div>
-        </div>
-        <div class="mb-tile">
-          <div class="imgw"><img id="mb-food" alt=""><div class="fb">F</div></div>
-          <div class="cap"><div class="cat">Food</div><div class="val" id="mbFoodVal">—</div></div>
-        </div>
-        <div class="mb-tile">
-          <div class="imgw"><img id="mb-drink" alt=""><div class="fb">D</div></div>
-          <div class="cap"><div class="cat">Drink</div><div class="val" id="mbDrinkVal">—</div></div>
-        </div>
-      </div>
+      <div class="accordions" id="mbAccordions"></div>
 
       <div class="mb-list">
         <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px;"><h4 style="margin:0;">Shopping list</h4><span id="mbShopPeople" style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--faint);">for 6 people</span></div>
@@ -388,26 +433,69 @@
     setImg('img-drink',state.drink,500,640);
     applyTheme();
   }
-  function renderBoard(){
-    el('mbCraftVal').textContent=state.craft.name;
-    var oldMbBadge=document.getElementById('diff-badge-mb');
-    if(oldMbBadge) oldMbBadge.remove();
-    if(state.craft.difficulty){
-      var diffMap2={easy:'Easy · 30min–1hr',medium:'Medium · 1–2hrs',hard:'Difficult · 2–4hrs'};
-      var mbBadge=document.createElement('div');
-      mbBadge.id='diff-badge-mb';
-      mbBadge.className='diff-badge diff-'+state.craft.difficulty;
-      mbBadge.textContent=diffMap2[state.craft.difficulty]||state.craft.difficulty;
-      var mbCapL=document.querySelector('#mb-craft').closest('.mb-tile').querySelector('.cap');
-      if(mbCapL) mbCapL.appendChild(mbBadge);
+  function buildAccordion(cat, item){
+    var diffLabels={easy:'Easy · 30min–1hr',medium:'Medium · 1–2hrs',hard:'Difficult · 2–4hrs'};
+    var acc=document.createElement('div'); acc.className='accordion';
+    // head
+    var head=document.createElement('div'); head.className='accordion-head';
+    var thumb=document.createElement('div'); thumb.className='accordion-thumb';
+    if(item.image){ var ti=document.createElement('img'); ti.src=item.image; ti.alt=''; thumb.appendChild(ti); }
+    else { thumb.textContent=cat==='Craft'?'✦':cat==='Food'?'◉':'◎'; }
+    var title=document.createElement('div'); title.className='accordion-title';
+    var catEl=document.createElement('div'); catEl.className='accordion-cat'; catEl.textContent=cat;
+    var nameEl=document.createElement('div'); nameEl.className='accordion-name'; nameEl.textContent=item.name||'—';
+    var metaEl=document.createElement('div'); metaEl.className='accordion-meta';
+    if(item.difficulty){
+      var b=document.createElement('span'); b.className='accordion-badge acc-'+item.difficulty;
+      b.textContent=diffLabels[item.difficulty]||item.difficulty; metaEl.appendChild(b);
     }
-    el('mbFoodVal').textContent=state.food.name;
-    el('mbDrinkVal').textContent=state.drink.name;
+    if(item.desc){
+      var ds=document.createElement('span'); ds.style.cssText='font-size:12px;color:var(--soft);';
+      ds.textContent=item.desc; metaEl.appendChild(ds);
+    }
+    title.appendChild(catEl); title.appendChild(nameEl); title.appendChild(metaEl);
+    var chev=document.createElement('span'); chev.className='accordion-chevron'; chev.innerHTML='&#9660;';
+    head.appendChild(thumb); head.appendChild(title); head.appendChild(chev);
+    head.addEventListener('click',function(){ acc.classList.toggle('open'); });
+    // body
+    var body=document.createElement('div'); body.className='accordion-body';
+    var inner=document.createElement('div'); inner.className='accordion-inner';
+    if(item.desc){
+      var s1=document.createElement('div'); s1.className='acc-section';
+      var l1=document.createElement('div'); l1.className='acc-section-label'; l1.textContent='About';
+      var d1=document.createElement('div'); d1.className='acc-desc'; d1.textContent=item.desc;
+      s1.appendChild(l1); s1.appendChild(d1); inner.appendChild(s1);
+    }
+    if(item.instructions){
+      var s2=document.createElement('div'); s2.className='acc-section';
+      var l2=document.createElement('div'); l2.className='acc-section-label'; l2.textContent='Instructions';
+      var d2=document.createElement('div'); d2.className='acc-instructions'; d2.textContent=item.instructions;
+      s2.appendChild(l2); s2.appendChild(d2); inner.appendChild(s2);
+    }
+    if(item.supplies&&item.supplies.length){
+      var s3=document.createElement('div'); s3.className='acc-section';
+      var l3=document.createElement('div'); l3.className='acc-section-label'; l3.textContent="What you'll need";
+      var ul=document.createElement('ul'); ul.className='acc-supply-list';
+      item.supplies.forEach(function(s){ var li=document.createElement('li'); li.textContent=s; ul.appendChild(li); });
+      s3.appendChild(l3); s3.appendChild(ul); inner.appendChild(s3);
+    }
+    body.appendChild(inner); acc.appendChild(head); acc.appendChild(body);
+    return acc;
+  }
+
+  function renderBoard(){
     el('mbPeople').textContent='For '+state.serves+' people';
     el('mbShopPeople').textContent='for '+state.serves+' people';
-    setImg('mb-craft',state.craft,500,500);
-    setImg('mb-food',state.food,500,500);
-    setImg('mb-drink',state.drink,500,500);
+    pal(el('mbPal'),state.theme.palette||[]);
+    // build accordions
+    var container=el('mbAccordions'); container.innerHTML='';
+    [['Craft',state.craft],['Food',state.food],['Drink',state.drink]].forEach(function(pair){
+      container.appendChild(buildAccordion(pair[0],pair[1]));
+    });
+    // open first by default
+    var first=container.querySelector('.accordion');
+    if(first) first.classList.add('open');
+    // shopping list still appears below
     var shop=el('mbShop'); shop.innerHTML='';
     var sections=[
       {label:'Craft supplies',items:state.craft.supplies||[]},
@@ -457,15 +545,55 @@
   el('restartBtn').addEventListener('click',function(){ resetKeeps(); shuffle(); show('screenGen'); });
 
   el('shareBtn2').addEventListener('click',function(){
-    el('shareUrl').value='craftnight.app/plan/'+Math.random().toString(36).slice(2,8);
+    var id=Math.random().toString(36).slice(2,8);
+    el('shareUrl').value='https://ppinkky.github.io/girls-night-in/?plan='+id;
+    el('pngProgress').style.display='none';
     el('shareOverlay').classList.add('show');
+    setTimeout(function(){ el('shareUrl').select(); },60);
   });
   el('shareClose').addEventListener('click',function(){ el('shareOverlay').classList.remove('show'); });
-  el('copyBtn').addEventListener('click',function(){
-    if(navigator.clipboard) navigator.clipboard.writeText(el('shareUrl').value).catch(function(){});
-    el('copyBtn').textContent='Copied'; setTimeout(function(){ el('copyBtn').textContent='Copy'; },1500);
-  });
   el('shareOverlay').addEventListener('click',function(e){ if(e.target===el('shareOverlay')) el('shareOverlay').classList.remove('show'); });
+  el('copyBtn').addEventListener('click',function(){
+    var url=el('shareUrl').value;
+    if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ el('copyBtn').textContent='Copied!'; setTimeout(function(){ el('copyBtn').textContent='Copy'; },1800); }).catch(function(){ fallbackCopy(url); }); }
+    else { fallbackCopy(url); }
+  });
+  function fallbackCopy(text){
+    var ta=document.createElement('textarea'); ta.value=text;
+    ta.style.cssText='position:fixed;left:-999px;top:-999px;'; document.body.appendChild(ta);
+    ta.focus(); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    el('copyBtn').textContent='Copied!'; setTimeout(function(){ el('copyBtn').textContent='Copy'; },1800);
+  }
+  window.savePNG=function(){
+    var prog=el('pngProgress'); prog.style.display='block'; prog.textContent='Capturing moodboard…';
+    var target=el('screenBoard');
+    var wasHidden=!target.classList.contains('active');
+    if(wasHidden){
+      target.style.display='block';
+      target.style.position='absolute';
+      target.style.left='-9999px';
+      target.style.top='0';
+    }
+    setTimeout(function(){
+      html2canvas(target,{
+        backgroundColor:'#E9E2CF', scale:2, useCORS:true, allowTaint:true,
+        width:target.scrollWidth, height:target.scrollHeight
+      }).then(function(canvas){
+        var link=document.createElement('a');
+        var themeName=(state.theme&&state.theme.name)?state.theme.name.toLowerCase().replace(/\s+/g,'-'):'plan';
+        link.download='girls-night-in-'+themeName+'.png';
+        link.href=canvas.toDataURL('image/png');
+        link.click();
+        prog.style.display='none';
+        if(wasHidden){ target.style.display=''; target.style.position=''; target.style.left=''; target.style.top=''; }
+        el('shareOverlay').classList.remove('show');
+      }).catch(function(err){
+        prog.textContent='Could not capture — try a screenshot instead.';
+        console.error('html2canvas error:',err);
+        if(wasHidden){ target.style.display=''; target.style.position=''; target.style.left=''; target.style.top=''; }
+      });
+    },150);
+  };
 
   // ---- Supabase connection ----
   var SUPA_URL = 'https://stuarkbtyovbhnyvssbs.supabase.co';
