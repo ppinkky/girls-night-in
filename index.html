@@ -294,38 +294,8 @@
     {name:"Autumn Harvest", bg:"#EAD9C0", ink:"#5C3A1E", accent:"#C06A2C", font:"'Anton',sans-serif", weight:400, caps:true, scale:1, vibe:"earthy & rich", palette:["#C06A2C","#E3B168","#EAD9C0","#5C3A1E"]}
   ];
 
-  function mk(n,kw,lk){ return {name:n,kw:kw,lk:lk}; }
-  var crafts=[mk("Hand-poured candles","candle,handmade",101),mk("Embroidered tote bags","embroidery,fabric",102),mk("Clay trinket dishes","pottery,clay",103),mk("Watercolor prints","watercolor,painting",104),mk("Macramé plant hangers","macrame",105),mk("Painted terracotta pots","terracotta,plant",106),mk("Beaded bracelets","beads,jewelry",107),mk("Marbled coasters","marble,paper,craft",108)];
-  var foods=[mk("Mini quiches & fruit","quiche",201),mk("Lemon bars & caprese","lemon,dessert",202),mk("Fig & honey board","charcuterie",203),mk("Baked brie & crostini","brie,cheese",204),mk("Cider donuts","donut",205),mk("Herb focaccia & olives","focaccia,bread",206),mk("Pumpkin mini muffins","muffin",207)];
-  var drinks=[mk("Elderflower spritz","cocktail,spritz",301),mk("Minty lemonade","lemonade",302),mk("Rosé sangria","sangria,wine",303),mk("Spiced chai","chai,tea",304),mk("Cider mimosas","mimosa,drink",305),mk("Iced hibiscus tea","iced,tea",306),mk("Berry prosecco","prosecco,drink",307)];
-  var craftSupplies={
-    "Hand-poured candles":["Soy wax flakes (2 lbs)","Pre-tabbed cotton wicks","Fragrance oil of choice","Glass or tin containers","Wooden stir sticks","Thermometer","Pouring pitcher","Labels"],
-    "Embroidered tote bags":["Plain canvas tote bags","Embroidery floss (assorted)","5\" & 7\" hoops","Embroidery needles","Water-soluble fabric pen","Scissors","Pattern printouts","Iron-on stabilizer"],
-    "Clay trinket dishes":["Air-dry clay (1 block each)","Small rolling pins","Cookie cutters / stamps","Acrylic paint set","Sponge brushes","Mod Podge sealant","Parchment paper","Sandpaper (fine)"],
-    "Watercolor prints":["Cold-press watercolor paper","Watercolor paint set","Round brushes (2, 6, 10)","Painter's tape","Pencils","Water jars","Paper towels","Spray bottle"],
-    "Macramé plant hangers":["5mm macramé cord (50ft each)","Wooden dowels or rings","S-hooks","Scissors","Measuring tape","Small pothos or succulents","Fringe brush (optional)","Hanging hardware"],
-    "Painted terracotta pots":["Terracotta pots (4\"-6\")","Chalk or acrylic paint","Flat & round brushes","Painter's tape","Spray sealant","Drop cloth","Palette paper","Water cups"],
-    "Beaded bracelets":["Seed beads (assorted colors)","0.5mm elastic cord","Bead sorting trays","Big-eye needles","Scissors","Crimp covers","Bead mat","Clasps (optional)"],
-    "Marbled coasters":["Plain cork coasters","Acrylic pour paint (3-4 colors)","Silicone oil","Plastic cups","Stir sticks","Blow torch or straw","Gloss varnish","Drop cloth"]
-  };
-  var foodSupplies={
-    "Mini quiches & fruit":["Eggs (1 doz)","Heavy cream","Mini pie shells","Gruyère cheese","Baby spinach","Cherry tomatoes","Assorted fruit","Honey for drizzle"],
-    "Lemon bars & caprese":["Fresh lemons (6)","Butter","Powdered sugar","Flour","Eggs","Fresh mozzarella","Heirloom tomatoes","Basil & good olive oil"],
-    "Fig & honey board":["Dried & fresh figs","Local honey","Aged cheddar & brie","Prosciutto","Walnuts & almonds","Crackers & crostini","Grapes","Rosemary sprigs"],
-    "Baked brie & crostini":["Wheel of brie","Puff pastry sheet","Fig jam","Walnuts","Baguette","Olive oil","Fresh thyme","Egg wash"],
-    "Cider donuts":["Apple cider (2 cups)","Flour","Cinnamon & nutmeg","Sugar","Baking powder","Eggs & butter","Oil for frying","Powdered sugar for coating"],
-    "Herb focaccia & olives":["Bread flour (3 cups)","Active dry yeast","Olive oil (generous)","Fresh rosemary","Flaky sea salt","Mixed olives","Garlic cloves","Cherry tomatoes"],
-    "Pumpkin mini muffins":["Canned pumpkin purée","Flour","Eggs","Brown sugar","Cinnamon & pumpkin spice","Butter","Cream cheese (frosting)","Mini muffin tins"]
-  };
-  var drinkSupplies={
-    "Elderflower spritz":["Elderflower cordial","Prosecco (2 bottles)","Sparkling water","Fresh cucumber","Mint leaves","Lemon","Ice","Champagne flutes"],
-    "Minty lemonade":["Fresh lemons (8)","Granulated sugar","Fresh mint (big bunch)","Sparkling or still water","Ice","Pitcher","Simple syrup","Lemon slices for garnish"],
-    "Rosé sangria":["Dry rosé (2 bottles)","Brandy (¼ cup)","Simple syrup","Strawberries & peaches","Orange slices","Sparkling water","Ice","Large pitcher"],
-    "Spiced chai":["Chai concentrate or loose leaf","Whole milk or oat milk","Cinnamon sticks","Star anise","Cardamom pods","Honey","Vanilla extract","Mugs"],
-    "Cider mimosas":["Apple cider (fresh, 1 jug)","Prosecco (2 bottles)","Cinnamon sticks","Apple slices","Champagne flutes","Ice bucket","Caramel drizzle","Brown sugar rim"],
-    "Iced hibiscus tea":["Dried hibiscus flowers","Cane sugar","Fresh ginger","Lime juice","Sparkling water","Ice","Mint","Tall glasses"],
-    "Berry prosecco":["Prosecco (2 bottles)","Fresh raspberries & blackberries","Crème de cassis (optional)","Lemon zest","Mint","Champagne flutes","Ice bucket","Berry skewers"]
-  };
+  var crafts=[], foods=[], drinks=[];
+
 
   function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
   function el(id){ return document.getElementById(id); }
@@ -334,7 +304,8 @@
   function hexA(hex,a){ var n=parseInt(hex.slice(1),16); return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')'; }
   function pal(node,arr){ node.innerHTML=''; arr.forEach(function(h){ var d=document.createElement('div'); d.className='d'; d.style.background=h; d.style.boxShadow='inset 0 0 0 1px rgba(0,0,0,0.10)'; node.appendChild(d); }); }
 
-  var state={theme:pick(themes),craft:pick(crafts),food:pick(foods),drink:pick(drinks),serves:6};
+  var emptyItem={name:'Loading…',supplies:[],images:[]};
+  var state={theme:{name:'Loading…',bg:'#E9E2CF',ink:'#1B1A18',palette:[],font:"'Inter',sans-serif",weight:600,caps:false,scale:1},craft:emptyItem,food:emptyItem,drink:emptyItem,serves:6};
   var kept={craft:false,food:false,drink:false};
 
   function styleThemeBox(box, nameEl, lblEl, t, baseSize){
@@ -439,9 +410,9 @@
     setImg('mb-drink',state.drink,500,500);
     var shop=el('mbShop'); shop.innerHTML='';
     var sections=[
-      {label:'Craft supplies',items:craftSupplies[state.craft.name]||[]},
-      {label:'Food & kitchen',items:foodSupplies[state.food.name]||[]},
-      {label:'Drinks & bar',items:drinkSupplies[state.drink.name]||[]}
+      {label:'Craft supplies',items:state.craft.supplies||[]},
+      {label:'Food & kitchen',items:state.food.supplies||[]},
+      {label:'Drinks & bar',items:state.drink.supplies||[]}
     ];
     sections.forEach(function(s){
       var sec=document.createElement('div'); sec.className='list-sec';
