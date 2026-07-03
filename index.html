@@ -453,6 +453,10 @@
       var ds=document.createElement('span'); ds.style.cssText='font-size:12px;color:var(--soft);';
       ds.textContent=item.desc; metaEl.appendChild(ds);
     }
+    if(item.contributedBy){
+      var cb=document.createElement('span'); cb.style.cssText='font-size:11px;color:var(--faint);font-style:italic;';
+      cb.textContent='by '+item.contributedBy; metaEl.appendChild(cb);
+    }
     title.appendChild(catEl); title.appendChild(nameEl); title.appendChild(metaEl);
     var chev=document.createElement('span'); chev.className='accordion-chevron'; chev.innerHTML='&#9660;';
     head.appendChild(thumb); head.appendChild(title); head.appendChild(chev);
@@ -608,7 +612,7 @@
 
   function fromRow(row){
     return {
-      id:row.id, name:row.name, desc:row.description, difficulty:row.difficulty,
+      id:row.id, name:row.name, desc:row.description, contributedBy:row.contributed_by, difficulty:row.difficulty,
       baseServes:row.base_serves, supplies:row.supplies||[], instructions:row.instructions,
       image:row.image, images:row.images, vibe:row.vibe, palette:row.palette,
       bg:row.bg, ink:row.ink, kw:row.name, lk:row.id
