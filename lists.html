@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Girls Night In · Admin</title>
+<title>Girls Night In · Contributor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -181,7 +181,7 @@
   <!-- TOP BAR -->
   <div class="topbar">
     <div class="logo">Girls Night In</div>
-    <span class="tagline">Content manager</span>
+    <span class="tagline">Contributor portal</span>
     <div class="grow"></div>
     <span class="sync-dot"></span>
     <span style="font-size:12px;color:var(--green);font-weight:500;">Live sync on</span>
@@ -371,13 +371,13 @@
           <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:7px;flex-wrap:wrap;">
             <label style="margin:0;">Supplies / ingredients</label>
             <div style="display:flex;align-items:center;gap:8px;">
-              <label style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--soft);">Amounts are for</label>
+              <label id="base-serves-label" style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--soft);">Amounts are for</label>
               <div style="display:flex;align-items:center;gap:6px;background:var(--page);border:1.5px solid var(--hairline);border-radius:8px;padding:4px 8px;">
                 <button type="button" id="base-minus" style="width:22px;height:22px;border-radius:50%;border:1px solid var(--hairline);background:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
                 <span id="base-count" style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;min-width:14px;text-align:center;">4</span>
                 <button type="button" id="base-plus" style="width:22px;height:22px;border-radius:50%;border:1px solid var(--hairline);background:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
               </div>
-              <label style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--soft);">people</label>
+              <label id="base-serves-suffix" style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--soft);">people</label>
             </div>
           </div>
           <div class="supply-list" id="supply-list"></div>
@@ -450,6 +450,7 @@
       name: row.name,
       desc: row.description,
       contributedBy: row.contributed_by,
+      suppliesStructured: row.supplies_structured||[],
       difficulty: row.difficulty,
       baseServes: row.base_serves,
       supplies: row.supplies || [],
@@ -620,7 +621,9 @@
     el('fg-difficulty').style.display   = type==='craft'?'block':'none';
     el('fg-instructions').style.display = type==='craft'?'block':'none';
     document.querySelectorAll('.diff-opt').forEach(function(r){ r.checked=(r.value===item.difficulty); });
-    baseServes = item.baseServes||4; el('base-count').textContent = baseServes;
+    baseServes = item.baseServes||(type==='craft'?1:4); el('base-count').textContent=baseServes;
+    if(el('base-serves-label')) el('base-serves-label').textContent=type==='craft'?'Amount per':'Amounts are for';
+    if(el('base-serves-suffix')) el('base-serves-suffix').textContent=type==='craft'?'person':'people';
     clearAllSlots();
     if(type==='theme'){ (item.images||[]).forEach(function(src,i){ if(src) setSlotImage(i+'t',src); }); }
     else if(item.image){ setSlotImage(0, item.image); }
@@ -644,7 +647,8 @@
       difficulty: diffEl ? diffEl.value : null,
       baseServes: baseServes,
       instructions: el('f-instructions').value.trim(),
-      supplies: getSuppliesForSave(),
+      supplies: getSuppliesForSave().legacy,
+      supplies_structured: getSuppliesForSave().structured,
       url: el('f-url').value.trim(),
       vibe: el('f-vibe').value.trim(),
       source: 'manual'
@@ -714,22 +718,50 @@
   }
 
   // ── supply checklist ──
-  function normalizeSupply(s){ return typeof s==='object'&&s!==null ? s : {qty:'',name:s}; }
+  function normalizeSupply(s){
+    if(typeof s==='object'&&s!==null) return s;
+    // parse "2 lbs soy wax" -> {qty:2, unit:'lbs', name:'soy wax'}
+    var m=s.match(/^([\d.\/]+)?\s*([a-zA-Z]+)?\s+(.+)$/);
+    if(m&&m[1]) return {qty:m[1],unit:m[2]||'',name:m[3]||s};
+    return {qty:'',unit:'',name:s};
+  }
   function renderSupplies(){
     var list=el('supply-list'); list.innerHTML='';
+    // header row
+    var hdr=document.createElement('div'); hdr.style.cssText='display:flex;gap:0;padding:6px 36px 6px 36px;';
+    var hl=['Qty','Unit','Item name'].map(function(t,i){
+      var s=document.createElement('span');
+      s.style.cssText='font-family:"Space Mono",monospace;font-size:9.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--faint);'+(i===0?'width:60px;flex:0 0 60px':i===1?'width:80px;flex:0 0 80px':'flex:1');
+      s.textContent=t; return s;
+    });
+    hl.forEach(function(h){ hdr.appendChild(h); }); list.appendChild(hdr);
+
     var items=pendingTags.map(normalizeSupply);
     items.forEach(function(item,i){
       var row=document.createElement('div'); row.className='supply-row';
       var chk=document.createElement('div'); chk.className='supply-check';
       var box=document.createElement('div'); box.className='supply-check-box'; chk.appendChild(box);
-      var qty=document.createElement('input'); qty.className='supply-qty'; qty.type='text'; qty.placeholder='Qty'; qty.value=item.qty||'';
+
+      var qty=document.createElement('input'); qty.className='supply-qty'; qty.type='text';
+      qty.placeholder='0'; qty.value=item.qty||'';
+      qty.style.cssText='width:60px;flex:0 0 60px;font-family:"Inter",sans-serif;font-size:13px;font-weight:700;padding:10px 6px;border:none;outline:none;background:transparent;color:var(--ink);';
       qty.oninput=function(){ items[i].qty=qty.value; syncPending(items); };
-      var name=document.createElement('input'); name.className='supply-name'; name.type='text'; name.placeholder='Item name'; name.value=item.name||'';
+
+      var unit=document.createElement('input'); unit.type='text';
+      unit.placeholder='lbs, cup…'; unit.value=item.unit||'';
+      unit.style.cssText='width:80px;flex:0 0 80px;font-family:"Inter",sans-serif;font-size:13px;padding:10px 6px;border:none;border-left:1px solid var(--hairline);outline:none;background:transparent;color:var(--soft);';
+      unit.oninput=function(){ items[i].unit=unit.value; syncPending(items); };
+
+      var name=document.createElement('input'); name.className='supply-name'; name.type='text';
+      name.placeholder='Item name'; name.value=item.name||'';
+      name.style.cssText='flex:1;font-family:"Inter",sans-serif;font-size:13.5px;padding:10px 10px;border:none;border-left:1px solid var(--hairline);outline:none;background:transparent;color:var(--ink);';
       name.oninput=function(){ items[i].name=name.value; syncPending(items); };
       name.onkeydown=function(e){ if(e.key==='Enter'){ e.preventDefault(); addSupplyRow(); } };
+
       var del=document.createElement('button'); del.className='supply-del'; del.innerHTML='&times;';
       del.onclick=function(){ pendingTags.splice(i,1); renderSupplies(); };
-      row.appendChild(chk); row.appendChild(qty); row.appendChild(name); row.appendChild(del);
+
+      row.appendChild(chk); row.appendChild(qty); row.appendChild(unit); row.appendChild(name); row.appendChild(del);
       list.appendChild(row);
     });
     var addRow=document.createElement('div'); addRow.className='supply-add-row';
@@ -737,15 +769,18 @@
     addBtn.onclick=addSupplyRow; addRow.appendChild(addBtn); list.appendChild(addRow);
   }
   function addSupplyRow(){
-    pendingTags.push({qty:'',name:''}); renderSupplies();
+    pendingTags.push({qty:'',unit:'',name:''}); renderSupplies();
     var rows=el('supply-list').querySelectorAll('.supply-name');
     if(rows.length) rows[rows.length-1].focus();
   }
   function syncPending(items){ pendingTags=items.slice(); }
   function getSuppliesForSave(){
-    return pendingTags.map(normalizeSupply).filter(function(s){ return s.name.trim(); }).map(function(s){
-      return s.qty.trim() ? s.qty.trim()+' '+s.name.trim() : s.name.trim();
+    // return both legacy string and structured
+    var structured=pendingTags.map(normalizeSupply).filter(function(s){ return s.name.trim(); });
+    var legacy=structured.map(function(s){
+      return [s.qty,s.unit,s.name].filter(Boolean).join(' ').trim();
     });
+    return {legacy:legacy, structured:structured};
   }
 
   // ── base serves stepper ──
@@ -799,5 +834,6 @@
   loadAll();
 })();
 </script>
+  <div style="text-align:center;padding:24px 20px 32px;font-family:'Space Mono',monospace;font-size:11.5px;color:var(--soft);">made irresponsibly by <a href="https://pinkyarun.notion.site/i-build-cool-shit-3309e09ea89480de8c7ad7cc8d103d60" target="_blank" style="color:var(--accent);text-decoration:underline;text-underline-offset:3px;">pinky</a>, play at your own risk.</div>
 </body>
 </html>
