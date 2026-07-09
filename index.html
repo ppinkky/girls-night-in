@@ -23,6 +23,9 @@
   @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
 
   .wrap{ max-width:920px; margin:0 auto; padding:26px 20px 40px; }
+  @media (max-width:680px){ .wrap{ padding:14px 14px 100px; } }
+  @media (max-width:680px){ .theme{ padding:14px 16px; margin-bottom:12px; } }
+  @media (max-width:680px){ .theme .name{ font-size:26px; } }
   .board-wrap{ max-width:760px; }
 
   .head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
@@ -39,7 +42,20 @@
   .theme .pal .d{ width:26px; height:26px; border-radius:6px; }
 
   .cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
-  @media (max-width:680px){ .cards{ grid-template-columns:1fr; } }
+  @media (max-width:680px){
+    .cards{ grid-template-columns:1fr; gap:10px; }
+    .card{ display:flex; flex-direction:row; border-radius:14px; }
+    .card .imgw{ width:90px; flex:0 0 90px; aspect-ratio:unset; height:90px; border-radius:12px 0 0 12px; overflow:hidden; }
+    .card .imgw img{ width:100%; height:100%; object-fit:cover; }
+    .card .imgw .fb{ border-radius:12px 0 0 12px; }
+    .card .imgw .kept-tag{ top:6px; left:6px; font-size:9px; padding:3px 7px; }
+    .card .cap{ flex:1; display:flex; align-items:center; padding:10px 12px; }
+    .card .capL{ flex:1; }
+    .card .cat{ font-size:9.5px; }
+    .card .val{ font-size:14px; }
+    .keep{ font-size:11px; padding:6px 10px; }
+    .diff-badge{ font-size:9px; padding:2px 6px; margin-top:3px; }
+  }
   .card{ border-radius:16px; overflow:hidden; background:var(--card); border:1.5px solid var(--hairline); transition:border-color 0.15s ease; }
   .card.kept{ border-color:var(--accent); }
   .card .imgw{ position:relative; aspect-ratio:3/4; }
@@ -244,15 +260,13 @@
       <button class="btn btn-solid" id="nextBtn">Next →</button>
     </div>
     <div class="wrap">
-      <div class="theme" id="genThemeBox">
+      <div class="theme" id="genThemeBox" style="position:relative;">
+        <button id="keepThemeBtn" class="keep" style="position:absolute;bottom:10px;right:10px;background:rgba(27,26,24,0.55);border-color:rgba(27,26,24,0.7);color:#F3EEE0;font-size:11px;backdrop-filter:blur(4px);">Keep</button>
         <div class="l">
           <div class="lbl" id="genLbl">Girls night in's theme</div>
           <div class="name" id="genTheme">—</div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex:0 0 auto;">
-          <div class="pal" id="genPal"></div>
-          <button id="keepThemeBtn" class="keep" style="background:rgba(27,26,24,0.55);border-color:rgba(27,26,24,0.7);color:#F3EEE0;font-size:11px;backdrop-filter:blur(4px);">Keep</button>
-        </div>
+        <div class="pal" id="genPal"></div>
       </div>
 
       <div class="cards">
@@ -301,7 +315,7 @@
         <button class="btn btn-solid" id="shareBtn2">Share plan</button>
       </div>
 
-      <div class="foot">made with <b>Girls Night In</b> · make your own</div>
+      <div class="foot">made irresponsibly by <a href="https://pinkyarun.notion.site/i-build-cool-shit-3309e09ea89480de8c7ad7cc8d103d60" target="_blank" style="color:var(--accent);text-decoration:underline;">pinky</a>, play at your own risk.</div>
     </div>
   </section>
 
@@ -436,6 +450,32 @@
     setImg('img-drink',state.drink,500,640);
     applyTheme();
   }
+  function scaleSupplies(item, serves, type){
+    var structured=item.suppliesStructured||[];
+    var base=item.baseServes||(type==='craft'?1:4);
+    var ratio=serves/base;
+
+    if(!structured.length){
+      // fallback: just return legacy strings
+      return {lines:item.supplies||[], ratio:ratio, base:base, type:type};
+    }
+
+    var lines=structured.filter(function(s){ return s.name&&s.name.trim(); }).map(function(s){
+      var qtyNum=parseFloat(s.qty);
+      if(s.qty&&!isNaN(qtyNum)){
+        var scaled=qtyNum*ratio;
+        // nice fractions for small numbers
+        var display;
+        if(scaled===Math.floor(scaled)){ display=scaled.toString(); }
+        else if(scaled<1){ display=Math.round(scaled*100)/100+''; }
+        else { display=Math.round(scaled*10)/10+''; }
+        return display+(s.unit?' '+s.unit:'')+' '+s.name.trim();
+      }
+      return (s.qty?s.qty+' ':'')+(s.unit?s.unit+' ':'')+s.name.trim();
+    });
+    return {lines:lines, ratio:ratio, base:base, type:type};
+  }
+
   function buildAccordion(cat, item){
     var diffLabels={easy:'Easy · 30min–1hr',medium:'Medium · 1–2hrs',hard:'Difficult · 2–4hrs'};
     var acc=document.createElement('div'); acc.className='accordion';
@@ -479,11 +519,14 @@
       var d2=document.createElement('div'); d2.className='acc-instructions'; d2.textContent=item.instructions;
       s2.appendChild(l2); s2.appendChild(d2); inner.appendChild(s2);
     }
-    if(item.supplies&&item.supplies.length){
+    var scaledData=scaleSupplies(item, state.serves, cat.toLowerCase());
+    if(scaledData.lines.length){
       var s3=document.createElement('div'); s3.className='acc-section';
-      var l3=document.createElement('div'); l3.className='acc-section-label'; l3.textContent="What you'll need";
+      var l3=document.createElement('div'); l3.className='acc-section-label';
+      l3.textContent=cat==='Craft'?"What you'll need (for "+state.serves+" people)":
+        "What you'll need ("+Math.ceil(scaledData.ratio)+"x batch"+( Math.ceil(scaledData.ratio)>1?'es':'')+", serves "+state.serves+")";
       var ul=document.createElement('ul'); ul.className='acc-supply-list';
-      item.supplies.forEach(function(s){ var li=document.createElement('li'); li.textContent=s; ul.appendChild(li); });
+      scaledData.lines.forEach(function(s){ var li=document.createElement('li'); li.textContent=s; ul.appendChild(li); });
       s3.appendChild(l3); s3.appendChild(ul); inner.appendChild(s3);
     }
     body.appendChild(inner); acc.appendChild(head); acc.appendChild(body);
@@ -505,22 +548,28 @@
     // shopping list still appears below
     var shop=el('mbShop'); shop.innerHTML='';
     var sections=[
-      {label:'Craft supplies',items:state.craft.supplies||[]},
-      {label:'Food & kitchen',items:state.food.supplies||[]},
-      {label:'Drinks & bar',items:state.drink.supplies||[]}
+      {label:'Craft supplies', item:state.craft, type:'craft'},
+      {label:'Food & kitchen', item:state.food,  type:'food'},
+      {label:'Drinks & bar',   item:state.drink, type:'drink'}
     ];
     sections.forEach(function(s){
+      var scaled=scaleSupplies(s.item, state.serves, s.type);
+      if(!scaled.lines.length) return;
       var sec=document.createElement('div'); sec.className='list-sec';
-      var lbl=document.createElement('div'); lbl.className='sec-label'; lbl.textContent=s.label; sec.appendChild(lbl);
+      var lbl=document.createElement('div'); lbl.className='sec-label';
+      var remark=s.type==='craft'?'for '+state.serves+' people':
+        Math.ceil(scaled.ratio)+'x batch'+(Math.ceil(scaled.ratio)>1?'es':'')+', serves '+state.serves;
+      lbl.textContent=s.label+' — '+remark;
+      sec.appendChild(lbl);
       var ul=document.createElement('ul');
-      s.items.forEach(function(i){ var li=document.createElement('li'); li.textContent=i; ul.appendChild(li); });
+      scaled.lines.forEach(function(i){ var li=document.createElement('li'); li.textContent=i; ul.appendChild(li); });
       sec.appendChild(ul); shop.appendChild(sec);
     });
     applyTheme();
   }
 
   function shuffle(){
-    state.theme=pick(themes);
+    if(!kept.theme) state.theme=pick(themes);
     if(!kept.craft) state.craft=pick(crafts);
     if(!kept.food) state.food=pick(foods);
     if(!kept.drink) state.drink=pick(drinks);
@@ -644,6 +693,7 @@
   function fromRow(row){
     return {
       id:row.id, name:row.name, desc:row.description, contributedBy:row.contributed_by, difficulty:row.difficulty,
+      suppliesStructured:row.supplies_structured||[],
       baseServes:row.base_serves, supplies:row.supplies||[], instructions:row.instructions,
       image:row.image, images:row.images, vibe:row.vibe, palette:row.palette,
       bg:row.bg, ink:row.ink, kw:row.name, lk:row.id
